@@ -1,4 +1,4 @@
-// Next.js route handler (POST /api/coach). Calls Google Gemini and returns structured JSON.
+// Serverless function (Vercel). Calls Google Gemini and returns structured JSON.
 // The API key lives ONLY in the host's environment variable GEMINI_API_KEY. Never commit it.
 
 const MODELS = [process.env.GEMINI_MODEL || 'gemini-flash-latest', 'gemini-2.5-flash'];
@@ -73,19 +73,16 @@ async function callGemini(model, key, body) {
   } finally { clearTimeout(t); }
 }
 
-export const maxDuration = 30;
-
-const json = (body, status = 200) => Response.json(body, { status });
-
-export async function POST(req) {
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   const key = process.env.GEMINI_API_KEY;
-  if (!key) return json({ error: 'no_key' }, 503);
+  if (!key) return res.status(503).json({ error: 'no_key' });
 
-  let body;
-  try { body = await req.json(); } catch { body = {}; }
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
   const { mode, text = '', context = {} } = body || {};
-  if (!['onboard', 'checkin', 'morning'].includes(mode)) return json({ error: 'bad mode' }, 400);
-  if (typeof text !== 'string' || text.length > 1500) return json({ error: 'text too long' }, 400);
+  if (!['onboard', 'checkin', 'morning'].includes(mode)) return res.status(400).json({ error: 'bad mode' });
+  if (typeof text !== 'string' || text.length > 1500) return res.status(400).json({ error: 'text too long' });
 
   const payload = {
     systemInstruction: { parts: [{ text: SYSTEM }] },
@@ -101,14 +98,14 @@ export async function POST(req) {
       lastErr = `${model}: ${r.status} ${(await r.text()).slice(0, 200)}`;
       if (r.status !== 404) break; // only fall back to the next model if this one does not exist
     }
-    if (!r.ok) return json({ error: 'ai_error', detail: lastErr }, 502);
+    if (!r.ok) return res.status(502).json({ error: 'ai_error', detail: lastErr });
     const data = await r.json();
     const raw = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
     const clean = raw.replace(/^```(json)?/i, '').replace(/```$/, '').trim();
     let out;
-    try { out = JSON.parse(clean); } catch { return json({ error: 'bad_json', raw: raw.slice(0, 300) }, 502); }
-    return json(out);
+    try { out = JSON.parse(clean); } catch { return res.status(502).json({ error: 'bad_json', raw: raw.slice(0, 300) }); }
+    return res.status(200).json(out);
   } catch (e) {
-    return json({ error: 'ai_unreachable', detail: String(e).slice(0, 200) }, 502);
+    return res.status(502).json({ error: 'ai_unreachable', detail: String(e).slice(0, 200) });
   }
-}
+};

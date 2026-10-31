@@ -1,6 +1,7 @@
-// Steady 5K — front end logic, started from app/page.js once the markup is on screen.
+// Steady 5K — front end. Plain JavaScript, no build step.
 // Data stays in this browser (localStorage). Prototype: use made-up data only.
-export function initSteady() {
+(() => {
+  'use strict';
 
   // ---------- Plan ladder (written for this project) ----------
   const STEPS = [
@@ -390,4 +391,4 @@ export function initSteady() {
     renderToday(); morning();
   }
   start();
-}
+})();
