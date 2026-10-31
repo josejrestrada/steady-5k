@@ -28,23 +28,45 @@
 
     <div id="demoBanner" class="demo-banner" hidden>Demo mode: the AI is offline, so replies are basic. Your entries are still saved.</div>
 
-    <!-- ONBOARDING -->
+    <!-- ONBOARDING: goal in his own words, then (for running goals) his starting level -->
     <main id="onboard" class="view" hidden>
-      <section class="hero">
-        <button id="onBack" class="btn-link back" hidden>Back</button>
+      <button id="onBack" class="btn-link back" hidden>Back</button>
+      <section id="stepGoal">
         <div class="hero-lane" aria-hidden="true"><i></i><i></i><i></i><span class="hero-tape"></span></div>
         <h1>What's your goal?</h1>
-        <div class="goal-choice" id="goalChoice" role="radiogroup" aria-label="Your goal"></div>
-      </section>
-      <section class="card">
-        <label for="onText" class="label">How's your running right now?</label>
-        <p class="small field-hint">In your own words. I'll build the plan and set your finish line.</p>
+        <p class="lede">Say it in your own words. You can have more than one, and change them later.</p>
         <div class="composer composer-lg">
-          <textarea id="onText" rows="4" placeholder="e.g. I started 2 months ago, I can run about 1.5 km before I need to walk. I run 3 days a week, mostly evenings."></textarea>
+          <textarea id="onText" rows="3" placeholder="e.g. Run 5 km straight and keep an eye on my calories"></textarea>
           <button class="mic" data-target="onText" aria-label="Speak instead"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         </div>
-        <button id="onGo" class="btn-primary">Build my plan</button>
+        <p class="small">Or tap to add:</p>
+        <div class="suggest" id="suggest">
+          <button data-add="Run 5K without stopping">Run 5K without stopping</button>
+          <button data-add="Run 10K">Run 10K</button>
+          <button data-add="Keep track of my calories">Keep track of my calories</button>
+        </div>
+        <button id="onGo" class="btn-primary">Next</button>
         <button id="onSample" class="btn-link">Just exploring? Load a sample week</button>
+      </section>
+
+      <section id="stepLevel" hidden>
+        <h1>Your goals</h1>
+        <ul class="found-goals" id="foundGoals"></ul>
+        <p id="goalNote" class="small"></p>
+        <div class="card">
+          <h3 class="sec-title">So your running plan starts at the right level</h3>
+          <p class="q">How far can you run now before you need to walk?</p>
+          <div class="seg" id="segDist" role="radiogroup" aria-label="Distance before walking">
+            <button data-v="0">Under 1 km</button><button data-v="1">1–2 km</button><button data-v="2">2–3 km</button>
+            <button data-v="3">3–5 km</button><button data-v="4">5–7 km</button><button data-v="5">More than 7 km</button>
+          </div>
+          <p class="q">How many days a week can you run?</p>
+          <div class="seg" id="segDays" role="radiogroup" aria-label="Runs per week">
+            <button data-v="2">2</button><button data-v="3">3</button><button data-v="4">4</button><button data-v="5">5</button>
+          </div>
+        </div>
+        <button id="levelGo" class="btn-primary">Build my plan</button>
+        <button id="levelBack" class="btn-link">Change my goals</button>
       </section>
       <p class="notice">Not medical advice. Steady does not diagnose or prescribe. If you have chest pain, faint, or feel dizzy, stop and see a doctor.</p>
     </main>
@@ -52,6 +74,7 @@
     <!-- GOALS: pick one of your saved goals -->
     <main id="goals" class="view" hidden>
       <h1>Which goal today?</h1>
+      <p class="lede small">All your goals keep going. Pick the one to focus on, or edit them.</p>
       <div id="goalList" class="goal-list"></div>
       <button id="addGoal" class="btn-link left">Add another goal</button>
     </main>
@@ -81,7 +104,14 @@
           <p id="coachMsg" class="coach-msg">…</p>
         </section>
 
-        <section class="card next">
+        <section class="card food-card" id="foodCard" hidden>
+          <h3 class="sec-title">Food today</h3>
+          <p class="food-total" id="foodTotal"></p>
+          <ul class="meals" id="mealsToday"></ul>
+          <p class="small">Rough ranges from what you tell the coach. No targets, no diet.</p>
+        </section>
+
+        <section class="card next" id="nextCard">
           <h3 class="sec-title" id="nextLabel">Next run</h3>
           <div class="stopwatch" id="nextSession">—</div>
           <p id="nextHint" class="small"></p>
@@ -94,7 +124,13 @@
 
       <!-- PLAN -->
       <main id="tab-plan" class="panel" hidden>
-        <h1 class="day-title">Plan</h1>
+        <h1 class="day-title" id="planTitle">Plan</h1>
+        <section class="card" id="foodWeek" hidden>
+          <h3 class="sec-title">Calories, last 7 days</h3>
+          <div class="weekbars" id="calbars"></div>
+          <p class="small">Each bar is the middle of that day's estimated range. Use it to spot patterns, like low-fuel days before a run.</p>
+        </section>
+        <div id="runPlan">
         <section class="track-panel" aria-label="Your progress to 5K">
           <div class="track-head">
             <p class="finish-title"><span id="finishLead">5K non-stop by</span> <strong id="finishDate">—</strong></p>
@@ -115,6 +151,7 @@
           <h3 class="sec-title" id="ladderTitle">All steps</h3>
           <ol class="ladder" id="ladder"></ol>
         </section>
+        </div>
       </main>
 
       <!-- COACH -->

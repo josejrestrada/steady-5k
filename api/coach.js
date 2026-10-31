@@ -44,11 +44,23 @@ RULES (never break these):
 7. Never invent numbers he did not give: use null. 1 bottle = 1 litre and 1 glass = 0.25 litre unless he says otherwise. Steps come from his phone, e.g. "7k steps" = 7000; never treat steps as km.
 8. If a check-in is too vague to log (e.g. "ok", "hi"), set needs_question=true and ask exactly one short question.
 9. Never sell, link or recommend products or brands.
+11. If one of his goals is keeping track of calories, it is for awareness only: give rough ranges, encourage enough fuel for running, and never set a calorie target, a deficit or a diet.
 10. If he asks a question about the future (e.g. "should I run tomorrow?"), answer it within these rules, log nothing as done, and use plan_action "repeat" unless rest is clearly right. When he is fasting, hydration advice means drinking between iftar and sehri, never during the fast.
 Output ONLY valid JSON matching the requested shape.`;
 
 function prompt(mode, text, ctx) {
   const c = JSON.stringify(ctx || {});
+  if (mode === 'goals') {
+    return `He is writing his goal(s) for the app in his own words: """${text}"""
+Context: ${c}
+The app can help with exactly three goal types:
+- "5k": run 5 km without stopping (any wording like "run 5km straight", "5k non-stop", "run without walking")
+- "10k": run 10 km
+- "cal": keep track of calories / what he eats (monitoring only, never a diet or deficit)
+Map each goal he states to one of these types. Keep his own words for the label (short, max 8 words, tidy capitalisation). One goal per type.
+Anything else (weight loss targets, muscle gain, a body shape, medical goals) goes in "unsupported" as a short phrase; never create a plan for it.
+Return JSON: {"goals": [{"type": "5k"|"10k"|"cal", "label": string}], "unsupported": [string], "reply": string (max 2 sentences: confirm his goals warmly; if something is unsupported, say kindly what the app does cover)}`;
+  }
   if (mode === 'onboard') {
     return `He is setting up the app and describes his running now: """${text}"""
 Context: ${c}
@@ -91,7 +103,7 @@ module.exports = async (req, res) => {
   let body = req.body;
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
   const { mode, text = '', context = {} } = body || {};
-  if (!['onboard', 'checkin', 'morning'].includes(mode)) return res.status(400).json({ error: 'bad mode' });
+  if (!['onboard', 'goals', 'checkin', 'morning'].includes(mode)) return res.status(400).json({ error: 'bad mode' });
   if (typeof text !== 'string' || text.length > 1500) return res.status(400).json({ error: 'text too long' });
 
   const payload = {

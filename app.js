@@ -24,9 +24,15 @@
         { nonstop: '50 min' }, { nonstop: '55 min' }, { nonstop: '60 min' },
         { nonstop: '10 km', final: true, mins: 70, km: 10 }],
     },
+    cal: {
+      title: 'Keep track of my calories', short: 'Calories', tape: 'kcal',
+      blurb: 'See roughly what you eat each day. No targets, no diet.',
+      steps: null, // monitoring only: no plan ladder
+    },
   };
   let GOAL = GOALS['5k'], STEPS = GOAL.steps, LAST = STEPS.length - 1;
-  function useGoal(id) { GOAL = GOALS[id] || GOALS['5k']; STEPS = GOAL.steps; LAST = STEPS.length - 1; }
+  function useGoal(id) { GOAL = GOALS[id] && GOALS[id].steps ? GOALS[id] : GOALS['5k']; STEPS = GOAL.steps; LAST = STEPS.length - 1; }
+  const isRun = (id) => !!(GOALS[id] && GOALS[id].steps);
   const SESSIONS_PER_STEP = 2;
   const stepText = (n) => {
     const s = STEPS[n];
@@ -47,10 +53,15 @@
   let S = load();
   // Each saved goal keeps its own place in its plan; check-ins (food, water, sleep) are shared.
   const GOAL_FIELDS = ['step', 'atStep', 'runsPerWeek', 'done', 'nextRest', 'lastChangeDay', 'created', 'intro'];
-  function stash() { if (!S || !S.goal) return; S.goals = S.goals || {}; S.goals[S.goal] = Object.fromEntries(GOAL_FIELDS.map((k) => [k, S[k]])); }
-  function activate(id) { stash(); Object.assign(S, S.goals[id]); S.goal = id; useGoal(id); save(); }
-  if (S && !S.goal) { S.goal = '5k'; stash(); } // older saves had one goal
-  if (S) useGoal(S.goal);
+  // S.goal is the goal in focus; S.runGoal is the running goal whose plan is loaded into S.step etc.
+  function stash() { if (!S || !S.runGoal) return; S.goals = S.goals || {}; S.goals[S.runGoal] = { ...S.goals[S.runGoal], ...Object.fromEntries(GOAL_FIELDS.map((k) => [k, S[k]])) }; }
+  function loadRun(id) { stash(); if (id && S.goals[id]) { Object.assign(S, Object.fromEntries(GOAL_FIELDS.map((k) => [k, S.goals[id][k]]))); } S.runGoal = id || null; useGoal(id || '5k'); }
+  function activate(id) { if (isRun(id)) loadRun(id); S.goal = id; save(); }
+  if (S && !S.goal) { S.goal = '5k'; S.runGoal = '5k'; S.goals = S.goals || {}; stash(); } // older saves had one goal
+  if (S && S.goal && S.runGoal === undefined) S.runGoal = isRun(S.goal) ? S.goal : null;
+  if (S) useGoal(S.runGoal || '5k');
+  const hasRun = () => !!(S && S.runGoal);
+  const labelOf = (id) => (S?.goals?.[id]?.label) || GOALS[id].title;
   const save = () => { try { stash(); localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
 
   // ---------- Helpers ----------
@@ -152,7 +163,7 @@
     const recent = S.logs.slice(-4).map((l) => ({ date: l.date, said: l.text.slice(0, 200), action: l.parsed?.plan_action, red_flag: l.parsed?.red_flag }));
     return {
       today: dayKey(), time: new Date().toTimeString().slice(0, 5),
-      goal: GOAL.title, plan_ladder: STEPS.slice(1).map((_, i) => `${i + 1} ${stepText(i + 1)}`).join('; '),
+      goals: Object.keys(S.goals || {}).map(labelOf), goal_in_focus: S.goal ? labelOf(S.goal) : '', running_goal: hasRun() ? GOAL.title : 'none', plan_ladder: STEPS.slice(1).map((_, i) => `${i + 1} ${stepText(i + 1)}`).join('; '),
       next_session: S.nextRest ? 'Rest day' : stepText(S.step), plan_step: `${S.step}/${LAST}`, sessions_done_at_step: `${S.atStep}/${SESSIONS_PER_STEP}`,
       ramadan_mode: S.ramadan, days_since_last_run: daysSinceRun(), runs_per_week: S.runsPerWeek,
       paused_for_red_flag: !!S.redFlag, recent_checkins: recent,
@@ -286,15 +297,15 @@
     show('main');
     $('ramadanBtn').setAttribute('aria-pressed', String(!!S.ramadan));
     $('dayLabel').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
-    $('goalName').textContent = GOAL.title;
+    $('goalName').textContent = labelOf(S.goal);
     $('flagBanner').hidden = !S.redFlag;
 
     // Rings: run, water, sleep
     const T = dayTotals(dayKey());
-    const resting = S.redFlag || S.nextRest;
-    const runGoal = planKm(S.step), waterGoal = S.ramadan ? 2.5 : 3, sleepGoal = 8;
+    const resting = S.redFlag || S.nextRest || !hasRun();
+    const runGoal = hasRun() ? planKm(S.step) : 0, waterGoal = S.ramadan ? 2.5 : 3, sleepGoal = 8;
     const parts = [
-      { label: 'Run', color: 'var(--c-run)', frac: resting ? (T.run ? 1 : 0) : T.run_km / runGoal, text: resting ? (T.run ? `${+T.run_km.toFixed(1)} km` : 'Rest day') : `${+T.run_km.toFixed(1)} / ${runGoal} km` },
+      { label: 'Run', color: 'var(--c-run)', frac: resting ? (T.run ? 1 : 0) : T.run_km / runGoal, text: resting ? (T.run ? `${+T.run_km.toFixed(1)} km` : hasRun() ? 'Rest day' : 'No run logged') : `${+T.run_km.toFixed(1)} / ${runGoal} km` },
       { label: S.ramadan ? 'Water, iftar to sehri' : 'Water', color: 'var(--c-water)', frac: T.water_l / waterGoal, text: `${+T.water_l.toFixed(1)} / ${waterGoal} L` },
       { label: 'Sleep', color: 'var(--c-sleep)', frac: (T.sleep_h || 0) / sleepGoal, text: `${T.sleep_h ?? 0} / ${sleepGoal} h` },
     ];
@@ -303,9 +314,32 @@
     const mini = (label, val, sub) => `<div class="mini"><b>${val}</b><span>${label}${sub ? `<br><small>${sub}</small>` : ''}</span></div>`;
     $('miniStats').innerHTML = [
       mini('Steps', T.hasSteps ? T.steps.toLocaleString('en-IN') : '—', 'from your phone'),
-      mini('Food', T.food ? `${Math.round(T.kLow / 50) * 50}–${Math.round(T.kHigh / 50) * 50}` : '—', 'kcal, approx.'),
+      S.goals?.cal ? '' : mini('Food', T.food ? `${Math.round(T.kLow / 50) * 50}–${Math.round(T.kHigh / 50) * 50}` : '—', 'kcal, approx.'),
       S.ramadan || T.fasting ? mini('Fast', T.fasting ? 'Yes' : '—', 'Ramadan mode') : '',
     ].join('');
+
+    // Calorie goal: food card (monitoring only). Whichever goal is in focus comes first.
+    const calGoal = !!S.goals?.cal, calFocus = S.goal === 'cal';
+    $('foodCard').hidden = !calGoal;
+    if (calGoal) {
+      const meals = logsFor(dayKey()).flatMap((l) => l.parsed?.log?.meals || []);
+      $('foodTotal').innerHTML = T.food ? `<b>${Math.round(T.kLow / 50) * 50}–${Math.round(T.kHigh / 50) * 50}</b> kcal so far, approx.` : 'Nothing logged yet today. Tell the coach what you ate.';
+      $('mealsToday').innerHTML = meals.map((m) => `<li><span>${esc(m.item)}</span><b>${m.kcal_low}–${m.kcal_high}</b></li>`).join('');
+    }
+    const tt = $('tab-today');
+    if (calFocus) tt.insertBefore($('foodCard'), document.querySelector('.rings-card')); else tt.insertBefore($('foodCard'), $('nextCard'));
+    $('nextCard').hidden = !hasRun();
+    $('runPlan').hidden = !hasRun();
+    $('foodWeek').hidden = !calGoal;
+    const tp = $('tab-plan');
+    if (calFocus || !hasRun()) tp.insertBefore($('foodWeek'), $('runPlan')); else tp.appendChild($('foodWeek'));
+    if (calGoal) {
+      let cb = ''; const cv = [];
+      for (let i = 6; i >= 0; i--) { const k = dayKey(addDays(new Date(), -i)); const D = dayTotals(k); cv.push([k, D.food ? Math.round((D.kLow + D.kHigh) / 2) : 0]); }
+      const cmax = Math.max(1000, ...cv.map((v) => v[1]));
+      for (const [k, v] of cv) cb += `<div class="wb ${k === dayKey() ? 'today' : ''}"><span>${v ? (v / 1000).toFixed(1) + 'k' : ''}</span><i style="height:${(v / cmax) * 70}%"></i>${new Date(k).toLocaleDateString('en-IN', { weekday: 'narrow' })}</div>`;
+      $('calbars').innerHTML = cb;
+    }
 
     // Coach card: the latest thing the coach said today
     const todays = logsFor(dayKey());
@@ -329,7 +363,7 @@
     $('ladderTitle').textContent = `All ${LAST} steps`;
     $('finishLead').textContent = S.done ? 'You did it:' : `${GOAL.short} by`;
     $('finishDate').textContent = S.done ? GOAL.short : fmtDate(targetDate());
-    $('finishNote').textContent = S.done ? (S.goal === '5k' ? 'Next goal: 10K. Add it from your goals.' : 'Keep running for fun, and pick a new goal when you like.') : '';
+    $('finishNote').textContent = S.done ? (S.runGoal === '5k' ? 'Next goal: 10K. Add it from your goals.' : 'Keep running for fun, and pick a new goal when you like.') : '';
     $('finishNote').hidden = !S.done;
     $('planLabel').textContent = S.redFlag ? 'Paused' : S.nextRest ? 'Rest day' : `Next run: ${stepText(S.step)}`;
     $('nextPlan').innerHTML = S.redFlag ? '<p class="small">No session until you have seen a doctor about the warning sign, or you feel completely fine.</p>'
@@ -367,50 +401,103 @@
   }
 
   // ---------- Actions ----------
-  // ---------- Goals: pick, save, switch ----------
-  let pickedGoal = '5k';
-  function renderGoalChoice() {
-    $('goalChoice').innerHTML = Object.entries(GOALS).map(([id, g]) => {
-      const have = S?.goals?.[id];
-      return `<button class="goal-opt" role="radio" aria-checked="${id === pickedGoal}" data-goal="${id}" ${have ? 'disabled' : ''}>
-        <b>${g.title}</b><span>${have ? 'Already one of your goals' : g.blurb}</span></button>`;
-    }).join('');
-  }
+  // ---------- Goals: in his own words, saved, editable, all kept going ----------
+  // Starting step for each running goal from "how far can you run before you need to walk?"
+  const START = { '5k': [1, 3, 5, 8, 12, 13], '10k': [1, 1, 1, 1, 2, 5] };
+  let found = [], dist = null, days = 3, adding = false;
+
   function openSetup() {
-    const free = Object.keys(GOALS).find((id) => !S?.goals?.[id]);
-    if (!free) { toast('You already have both goals saved.'); return; }
-    pickedGoal = free; renderGoalChoice();
+    adding = !!S; found = []; dist = null; days = (S && S.runsPerWeek) || 3;
+    $('onText').value = ''; autoGrow($('onText'));
+    $('stepGoal').hidden = false; $('stepLevel').hidden = true;
     $('onBack').hidden = !S; $('onSample').hidden = !!S;
-    $('onText').value = '';
     show('onboard'); window.scrollTo(0, 0);
   }
+
+  function demoGoals(text) {
+    const t = text.toLowerCase(), g = [];
+    if (/10\s*k|10\s*km|ten k/.test(t)) g.push({ type: '10k', label: 'Run 10K' });
+    if (/5\s*k|5\s*km|five k|run|bhag/.test(t) && !g.length) g.push({ type: '5k', label: 'Run 5K without stopping' });
+    if (/calor|kcal|food|eat|diet|khana/.test(t)) g.push({ type: 'cal', label: 'Keep track of my calories' });
+    return { goals: g, unsupported: [], reply: g.length ? 'Got it. Here are your goals.' : '' };
+  }
+
+  async function readGoals() {
+    const text = $('onText').value.trim();
+    if (!text) { toast('Write your goal first, or tap one of the suggestions.'); return; }
+    $('onGo').disabled = true; $('onGo').textContent = 'Reading your goal…';
+    let r = await ai('goals', text, { today: dayKey(), existing_goals: Object.keys(S?.goals || {}) });
+    if (!Array.isArray(r.goals)) r = demoGoals(text);
+    $('onGo').disabled = false; $('onGo').textContent = 'Next';
+    found = r.goals.filter((g) => GOALS[g.type]).map((g) => ({ type: g.type, label: String(g.label || GOALS[g.type].title).slice(0, 80) }));
+    found = found.filter((g, i) => found.findIndex((x) => x.type === g.type) === i);
+    if (!found.length) { toast(r.reply || 'I can help with running 5K or 10K and keeping track of calories. Try one of the suggestions.'); return; }
+    window._goalReply = r.reply || '';
+    $('foundGoals').innerHTML = found.map((g) => `<li><span class="g-dot">${GOALS[g.type].tape}</span><span><b>${esc(g.label)}</b><small>${S?.goals?.[g.type] ? 'Updates your existing goal' : GOALS[g.type].blurb}</small></span></li>`).join('');
+    const un = (r.unsupported || []).filter(Boolean);
+    $('goalNote').textContent = un.length ? `Not something this app can help with: ${un.join(', ')}. It covers running and keeping track of food.` : '';
+    const needsLevel = found.some((g) => isRun(g.type) && !S?.goals?.[g.type]);
+    $('stepLevel').querySelector('.card').hidden = !needsLevel;
+    $('levelGo').textContent = needsLevel ? 'Build my plan' : 'Save my goals';
+    paintSeg();
+    $('stepGoal').hidden = true; $('stepLevel').hidden = false; window.scrollTo(0, 0);
+  }
+
+  function paintSeg() {
+    document.querySelectorAll('#segDist button').forEach((b) => b.setAttribute('aria-checked', String(+b.dataset.v === dist)));
+    document.querySelectorAll('#segDays button').forEach((b) => b.setAttribute('aria-checked', String(+b.dataset.v === days)));
+  }
+
+  function saveGoals() {
+    const needsLevel = !$('stepLevel').querySelector('.card').hidden;
+    if (needsLevel && dist == null) { toast('Tap how far you can run now, so the plan starts at the right level.'); return; }
+    if (!S) S = { v: 3, logs: [], ramadan: false, goals: {}, goal: null, runGoal: null };
+    let focus = null;
+    for (const g of found) {
+      if (S.goals[g.type]) { S.goals[g.type].label = g.label; focus = focus || g.type; continue; }
+      if (isRun(g.type)) {
+        if (g.type === '10k' && dist < 3) toast('The 10K plan starts at 30 minutes non-stop. The 5K goal may suit you first.', 6000);
+        stash();
+        S.goals[g.type] = { label: g.label, step: START[g.type][dist], atStep: 0, runsPerWeek: days, done: false, nextRest: false, lastChangeDay: null, created: dayKey() };
+        loadRun(g.type);
+      } else {
+        S.goals[g.type] = { label: g.label, created: dayKey() };
+      }
+      focus = focus || g.type;
+    }
+    if (!S.runGoal) { const r = Object.keys(S.goals).find(isRun); if (r) loadRun(r); }
+    S.goal = focus;
+    if (!adding || window._goalReply) S.morning = { date: dayKey(), message: window._goalReply || 'Your goals are saved.' };
+    save(); renderToday(); setTab('today');
+  }
+
   function renderGoals() {
     show('goals');
     $('goalList').innerHTML = Object.entries(S.goals).map(([id, g]) => {
-      useGoal(id);
-      const st = S.goal === id ? S : g;
-      const prog = st.done ? 'Finished 🏁' : `Step ${st.step} of ${LAST}`;
-      return `<button class="goal-card" data-goal="${id}"><span class="g-tape">${GOALS[id].tape}</span><span class="g-text"><b>${GOALS[id].title}</b><span>${prog}</span></span><span class="g-go" aria-hidden="true">›</span></button>`;
+      let prog = 'No targets, just awareness';
+      if (isRun(id)) { const st = S.runGoal === id ? S : g; const steps = GOALS[id].steps.length - 1; prog = st.done ? 'Finished 🏁' : `Step ${st.step} of ${steps}`; }
+      return `<div class="goal-card ${S.goal === id ? 'focus' : ''}">
+        <button class="goal-pick" data-goal="${id}"><span class="g-tape">${GOALS[id].tape}</span><span class="g-text"><b>${esc(labelOf(id))}</b><span>${prog}</span></span></button>
+        <button class="g-edit" data-edit="${id}" aria-label="Edit this goal">Edit</button>
+        <div class="g-form" id="edit-${id}" hidden>
+          <label class="small" for="lbl-${id}">Your goal, in your words</label>
+          <input id="lbl-${id}" value="${esc(labelOf(id))}" maxlength="80">
+          <div class="g-actions"><button class="btn-small" data-save="${id}">Save</button><button class="btn-small danger" data-remove="${id}">Remove goal</button></div>
+        </div></div>`;
     }).join('');
-    useGoal(S.goal);
     $('addGoal').hidden = Object.keys(GOALS).every((id) => S.goals[id]);
   }
 
-  async function onboard() {
-    const text = $('onText').value.trim();
-    if (!text) { toast('Tell me a little about your running first.'); return; }
-    $('onGo').disabled = true; $('onGo').textContent = 'Building your plan…';
-    useGoal(pickedGoal);
-    const r = await ai('onboard', text, { today: dayKey(), goal: GOAL.title, plan_ladder: STEPS.slice(1).map((_, i) => `${i + 1} ${stepText(i + 1)}`).join('; ') });
-    const fresh = { step: clamp(+r.start_step || 1, 1, LAST), atStep: 0, runsPerWeek: clamp(+r.runs_per_week || 3, 2, 5), done: false, nextRest: false, lastChangeDay: null, created: dayKey(), intro: text };
-    if (!S) S = { v: 2, logs: [], ramadan: !!r.ramadan, goals: {} };
-    else stash();
-    S.goals[pickedGoal] = fresh;
-    Object.assign(S, fresh); S.goal = pickedGoal;
-    $('onGo').disabled = false; $('onGo').textContent = 'Build my plan';
-    S.morning = { date: dayKey(), message: r.reply || `Plan ready. Start with: ${stepText(S.step)}.` }; save();
-    renderToday(); setTab('today');
+  function removeGoal(id) {
+    if (S.runGoal === id) { S.runGoal = null; }
+    delete S.goals[id];
+    const left = Object.keys(S.goals);
+    if (!left.length) { try { localStorage.removeItem(KEY); } catch {} S = null; start(); return; }
+    if (!S.runGoal) { const r = left.find(isRun); if (r) { S.runGoal = null; Object.assign(S, S.goals[r]); S.runGoal = r; useGoal(r); } }
+    if (S.goal === id) S.goal = S.runGoal || left[0];
+    save(); renderGoals(); toast('Goal removed.');
   }
+
   const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
 
   async function checkin() {
@@ -444,7 +531,7 @@
     const d = (n) => dayKey(addDays(new Date(), -n));
     const L = (n, text, log, reply, action) => ({ date: d(n), at: Date.now() - n * 864e5, text, note: '', parsed: { log: { meals: [], symptoms: [], ...log }, reply, plan_action: action, red_flag: false } });
     S = {
-      v: 2, goal: '5k', goals: {}, created: d(6), step: 5, atStep: 1, runsPerWeek: 3, ramadan: false, sample: true,
+      v: 3, goal: '5k', runGoal: '5k', goals: { cal: { label: 'Keep track of my calories', created: d(6) } }, created: d(6), step: 5, atStep: 1, runsPerWeek: 3, ramadan: false, sample: true,
       logs: [
         L(6, 'Ran 2k, walked 3 times. 2 bottles water. Slept 1am to 7am. Rice, dal, fish curry for lunch.', { run_km: 2, walk_breaks: 3, water_l: 2, sleep_h: 6, meals: [{ item: 'rice, dal, fish curry', kcal_low: 550, kcal_high: 800 }] }, 'Solid start. Try to get one more bottle of water in tomorrow.', 'repeat'),
         L(4, 'aaj 2.5k bhaga, 2 baar ruka, paani 3 bottle, 7 ghante soya', { run_km: 2.5, walk_breaks: 2, water_l: 3, sleep_h: 7 }, 'Fewer stops than last time. Good water day too.', 'up'),
@@ -476,11 +563,22 @@
   function autoGrow(t) { t.style.height = 'auto'; t.style.height = Math.min(140, t.scrollHeight) + 'px'; }
 
   // ---------- Wire up ----------
-  $('onGo').addEventListener('click', onboard);
+  $('onGo').addEventListener('click', readGoals);
+  $('levelGo').addEventListener('click', saveGoals);
+  $('levelBack').addEventListener('click', () => { $('stepLevel').hidden = true; $('stepGoal').hidden = false; });
+  $('suggest').addEventListener('click', (e) => { const b = e.target.closest('[data-add]'); if (!b) return; const t = $('onText'); t.value = t.value.trim() ? `${t.value.trim().replace(/[.,]$/, '')} and ${b.dataset.add.toLowerCase()}` : b.dataset.add; autoGrow(t); });
+  $('segDist').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (b) { dist = +b.dataset.v; paintSeg(); } });
+  $('segDays').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (b) { days = +b.dataset.v; paintSeg(); } });
   $('onSample').addEventListener('click', loadSample);
-  $('goalChoice').addEventListener('click', (e) => { const b = e.target.closest('[data-goal]'); if (!b || b.disabled) return; pickedGoal = b.dataset.goal; renderGoalChoice(); });
-  $('onBack').addEventListener('click', () => { S.goals && Object.keys(S.goals).length > 1 ? renderGoals() : (renderToday(), setTab('today')); });
-  $('goalList').addEventListener('click', (e) => { const b = e.target.closest('[data-goal]'); if (!b) return; if (b.dataset.goal !== S.goal) { activate(b.dataset.goal); S.morning = null; } renderToday(); setTab('today'); morning(); });
+  $('onBack').addEventListener('click', () => { Object.keys(S.goals).length > 1 ? renderGoals() : (renderToday(), setTab('today')); });
+  $('goalList').addEventListener('click', (e) => {
+    const t = e.target;
+    const pick = t.closest('[data-goal]'), ed = t.closest('[data-edit]'), sv = t.closest('[data-save]'), rm = t.closest('[data-remove]');
+    if (ed) { const f = $('edit-' + ed.dataset.edit); f.hidden = !f.hidden; if (!f.hidden) f.querySelector('input').focus(); return; }
+    if (sv) { const id = sv.dataset.save, v = $('lbl-' + id).value.trim(); if (v) { S.goals[id].label = v.slice(0, 80); save(); toast('Goal updated.'); } renderGoals(); return; }
+    if (rm) { if (rm.dataset.armed) { removeGoal(rm.dataset.remove); } else { rm.dataset.armed = '1'; rm.textContent = 'Tap again to remove'; } return; }
+    if (pick) { const id = pick.dataset.goal; const switched = id !== S.goal; activate(id); renderToday(); setTab('today'); if (switched && isRun(id)) morning(true); }
+  });
   $('addGoal').addEventListener('click', openSetup);
   $('goalSwitch').addEventListener('click', renderGoals);
   $('ciSend').addEventListener('click', checkin);
@@ -506,8 +604,8 @@
   }
 
   function start() {
-    if (!S) { pickedGoal = '5k'; renderGoalChoice(); $('onBack').hidden = true; $('onSample').hidden = false; show('onboard'); return; }
-    if (S.goals && Object.keys(S.goals).length > 1) { renderGoals(); return; } // more than one goal: ask which one today
+    if (!S) { openSetup(); return; }
+    if (S.goals && Object.keys(S.goals).length > 1) { renderGoals(); return; } // more than one goal: ask which one to focus on
     renderToday(); setTab('today'); morning();
   }
   start();
