@@ -97,6 +97,18 @@
           <div class="rings" id="rings"></div>
           <ul class="legend" id="legend"></ul>
         </section>
+        <section class="water-card" aria-label="Water today">
+          <div class="glass" id="glass" aria-hidden="true"><div class="glass-fill" id="glassFill"></div><div class="glass-marks" id="glassMarks"></div></div>
+          <div class="water-info">
+            <h3 class="sec-title">Water</h3>
+            <p class="water-amt"><b id="waterAmt">0</b> <span id="waterGoal">/ 3 L</span></p>
+            <p class="small" id="waterHint">One tap adds a glass (250 ml).</p>
+            <div class="water-btns">
+              <button id="waterMinus" class="wbtn" aria-label="Remove a glass">−</button>
+              <button id="waterPlus" class="wbtn plus">+ Glass</button>
+            </div>
+          </div>
+        </section>
         <div class="mini-stats" id="miniStats"></div>
 
         <section class="coach-card" aria-live="polite">
@@ -160,6 +172,18 @@
       <!-- FOOD: calorie tracker (rough ranges, no targets) -->
       <main id="tab-food" class="panel" hidden>
         <h1 class="day-title">Food</h1>
+        <section class="card" id="calGoalCard">
+          <h3 class="sec-title">Your calorie goal</h3>
+          <p class="small">Optional, and only you set it. Leave it empty to just keep track.</p>
+          <div class="goal-input">
+            <input id="calGoalIn" type="number" inputmode="numeric" min="1800" max="4500" step="50" placeholder="e.g. 2600" aria-label="Daily calorie goal in kcal">
+            <span>kcal a day</span>
+            <button id="calGoalSave" class="btn-small">Save</button>
+            <button id="calGoalClear" class="btn-small" hidden>Remove</button>
+          </div>
+          <p class="small" id="calGoalMsg"></p>
+        </section>
+
         <section class="card">
           <h3 class="sec-title">Add what you ate</h3>
           <div class="seg seg-sm" id="segMeal" role="radiogroup" aria-label="Which meal">
@@ -176,7 +200,13 @@
           <p class="food-total" id="foodDayTotal"></p>
           <div id="mealGroups"></div>
           <p class="small" id="fuelNote"></p>
-          <p class="small">Rough estimates from what you describe, shown as ranges. No targets, no diet.</p>
+        </section>
+        <section class="card" id="ideasCard">
+          <h3 class="sec-title">Meal ideas for the rest of today</h3>
+          <p class="small" id="ideasIntro">Balanced Indian options that roughly fit what is left of your goal. Ideas, not a prescription.</p>
+          <div id="ideas"></div>
+          <button id="ideasGo" class="btn-small">Suggest meals</button>
+          <p class="small">Calories are rough estimates from what you describe, shown as ranges.</p>
         </section>
         <section class="card">
           <h3 class="sec-title">Calories, last 7 days</h3>
@@ -210,7 +240,7 @@
         <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/></svg>Today</button>
         <button data-tab="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V6M4 6h12l-2.5 3.5L16 13H4"/></svg>Plan</button>
         <button data-tab="coach"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg>Coach</button>
-        <button data-tab="food"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M16 21V3c-2 1.5-3 4-3 7h3"/></svg>Food</button>
+        <button data-tab="food" id="foodTabBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M16 21V3c-2 1.5-3 4-3 7h3"/></svg>Food</button>
         <button data-tab="week"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-6M10 20V9M15 20v-8M20 20V5"/></svg>Week</button>
       </nav>
     </div>

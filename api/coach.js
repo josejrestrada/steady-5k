@@ -44,12 +44,19 @@ RULES (never break these):
 7. Never invent numbers he did not give: use null. 1 bottle = 1 litre and 1 glass = 0.25 litre unless he says otherwise. Steps come from his phone, e.g. "7k steps" = 7000; never treat steps as km.
 8. If a check-in is too vague to log (e.g. "ok", "hi"), set needs_question=true and ask exactly one short question.
 9. Never sell, link or recommend products or brands.
-11. If one of his goals is keeping track of calories, it is for awareness only: give rough ranges, encourage enough fuel for running, and never set a calorie target, a deficit or a diet.
+11. Calories: never suggest or set a calorie target yourself. Rizwan may set his own goal (the app only accepts 1,800 to 4,500 kcal); respect it, but never suggest skipping a meal, eating under 1,800 kcal, or eating less on a run day. Fuel for running comes first.
 10. If he asks a question about the future (e.g. "should I run tomorrow?"), answer it within these rules, log nothing as done, and use plan_action "repeat" unless rest is clearly right. When he is fasting, hydration advice means drinking between iftar and sehri, never during the fast.
 Output ONLY valid JSON matching the requested shape.`;
 
 function prompt(mode, text, ctx) {
   const c = JSON.stringify(ctx || {});
+  if (mode === 'ideas') {
+    return `Suggest meal ideas for the rest of his day. Context (his own calorie goal, what he has eaten so far as a range, meals left, whether he ran, Ramadan): ${c}
+Give one idea per meal left (max 4): simple, balanced, everyday Indian food he can get at home or college, with a calorie range. Together they should roughly fit what is left of HIS goal (goal minus the middle of what he has eaten).
+If little or nothing is left, or he is already over: do NOT suggest skipping anything; suggest a light, balanced option and say in the note that one day over is fine. If he ran today, include protein and carbs for recovery. If he is fasting in Ramadan, give iftar and sehri ideas instead, with plenty of fluids, never anything during the fast.
+Never mention supplements, products or brands. Never comment on his body or weight.
+Return JSON: {"ideas": [{"slot": "Breakfast"|"Lunch"|"Snacks"|"Dinner"|"Iftar"|"Sehri", "idea": string (max 12 words), "kcal_low": number, "kcal_high": number}], "note": string (one short sentence)}`;
+  }
   if (mode === 'meal') {
     return `He is logging food for his calorie tracker (${(ctx && ctx.slot) || 'a meal'}): """${text}"""
 Split it into separate items. For each, estimate calories for a typical Indian home portion as a range (kcal_low, kcal_high). Use counts he gives ("2 rotis"); if he gives no amount, assume one normal portion and widen the range. Name each item briefly with its amount, e.g. "2 rotis", "dal (1 bowl)".
@@ -109,7 +116,7 @@ module.exports = async (req, res) => {
   let body = req.body;
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
   const { mode, text = '', context = {} } = body || {};
-  if (!['onboard', 'goals', 'meal', 'checkin', 'morning'].includes(mode)) return res.status(400).json({ error: 'bad mode' });
+  if (!['onboard', 'goals', 'meal', 'ideas', 'checkin', 'morning'].includes(mode)) return res.status(400).json({ error: 'bad mode' });
   if (typeof text !== 'string' || text.length > 1500) return res.status(400).json({ error: 'text too long' });
 
   const payload = {

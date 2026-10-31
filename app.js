@@ -160,10 +160,10 @@
     return addDays(new Date(), Math.max(days, S.step === LAST ? 0 : 2));
   }
   function context() {
-    const recent = S.logs.filter((l) => l.kind !== 'meal').slice(-4).map((l) => ({ date: l.date, said: l.text.slice(0, 200), action: l.parsed?.plan_action, red_flag: l.parsed?.red_flag }));
+    const recent = S.logs.filter((l) => !['meal', 'water'].includes(l.kind)).slice(-4).map((l) => ({ date: l.date, said: l.text.slice(0, 200), action: l.parsed?.plan_action, red_flag: l.parsed?.red_flag }));
     return {
       today: dayKey(), time: new Date().toTimeString().slice(0, 5),
-      goals: Object.keys(S.goals || {}).map(labelOf), goal_in_focus: S.goal ? labelOf(S.goal) : '', running_goal: hasRun() ? GOAL.title : 'none', plan_ladder: STEPS.slice(1).map((_, i) => `${i + 1} ${stepText(i + 1)}`).join('; '),
+      goals: Object.keys(S.goals || {}).map(labelOf), own_calorie_goal: S.calGoal || null, goal_in_focus: S.goal ? labelOf(S.goal) : '', running_goal: hasRun() ? GOAL.title : 'none', plan_ladder: STEPS.slice(1).map((_, i) => `${i + 1} ${stepText(i + 1)}`).join('; '),
       next_session: S.nextRest ? 'Rest day' : stepText(S.step), plan_step: `${S.step}/${LAST}`, sessions_done_at_step: `${S.atStep}/${SESSIONS_PER_STEP}`,
       ramadan_mode: S.ramadan, days_since_last_run: daysSinceRun(), runs_per_week: S.runsPerWeek,
       paused_for_red_flag: !!S.redFlag, recent_checkins: recent,
@@ -300,8 +300,14 @@
   const r50 = (n) => Math.round(n / 50) * 50;
 
   function renderFood(T) {
+    $('foodTabBtn').hidden = !S.goals?.cal;
+    if (!S.goals?.cal && tab === 'food') setTab('today');
+    if (document.activeElement !== $('calGoalIn')) $('calGoalIn').value = S.calGoal || '';
+    $('calGoalClear').hidden = !S.calGoal;
+    $('ideasCard').hidden = !S.calGoal;
     document.querySelectorAll('#segMeal button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.v === mealSlot)));
-    $('foodDayTotal').innerHTML = T.food ? `<b>${r50(T.kLow)}–${r50(T.kHigh)}</b> kcal today, approx.` : 'Nothing logged yet today. Add what you ate above.';
+    const mid = Math.round((T.kLow + T.kHigh) / 2);
+    $('foodDayTotal').innerHTML = (T.food ? `<b>${r50(T.kLow)}–${r50(T.kHigh)}</b> kcal today, approx.` : 'Nothing logged yet today. Add what you ate above.') + (S.calGoal ? `<br><span class="small">Your goal: ${S.calGoal.toLocaleString('en-IN')} kcal. About ${Math.max(0, r50(S.calGoal - mid)).toLocaleString('en-IN')} left.</span>` : '');
     const groups = {};
     S.logs.forEach((l, li) => {
       if (l.date !== dayKey()) return;
@@ -367,6 +373,38 @@
     save(); renderToday();
   }
 
+  function addWater(delta) {
+    S.logs.push({ date: dayKey(), at: Date.now(), kind: 'water', text: delta > 0 ? '+1 glass' : '−1 glass', parsed: { log: { water_l: delta, meals: [], symptoms: [] } } });
+    save(); renderToday();
+  }
+
+  // Calorie goal: only Rizwan sets it; the app never suggests a number and refuses unsafe ones.
+  const CAL_MIN = 1800, CAL_MAX = 4500;
+  function saveCalGoal() {
+    const v = Math.round(+$('calGoalIn').value);
+    if (!v) { $('calGoalMsg').textContent = 'Type a number, or leave it empty to just keep track.'; return; }
+    if (v < CAL_MIN) { $('calGoalMsg').textContent = `That is too low for someone who runs regularly, so it was not saved. Talk to a doctor or dietitian before setting a goal under ${CAL_MIN.toLocaleString('en-IN')} kcal.`; return; }
+    if (v > CAL_MAX) { $('calGoalMsg').textContent = `That is unusually high. Check it with a doctor or dietitian; goals above ${CAL_MAX.toLocaleString('en-IN')} kcal are not saved.`; return; }
+    S.calGoal = v; S.ideas = null; save(); $('calGoalMsg').textContent = 'Goal saved. You can change it any time.'; renderToday();
+  }
+
+  const DEMO_IDEAS = {
+    Breakfast: ['Poha with peanuts and a banana', 'Two eggs, two rotis and a glass of milk'],
+    Lunch: ['Rice, dal, a bowl of sabzi and curd', 'Two rotis, chicken or paneer curry and salad'],
+    Snacks: ['A banana and a handful of peanuts', 'Sprouts chaat or a glass of buttermilk'],
+    Dinner: ['Two rotis, dal and a vegetable', 'Fish or egg curry with rice and salad'],
+  };
+  async function suggestMeals() {
+    const T = dayTotals(dayKey());
+    const done = new Set(logsFor(dayKey()).filter((l) => l.kind === 'meal').map((l) => l.slot));
+    const left = SLOTS.filter((x) => !done.has(x) && SLOTS.indexOf(x) >= SLOTS.indexOf(slotNow()));
+    $('ideasGo').disabled = true; $('ideasGo').textContent = 'Thinking…';
+    let r = await ai('ideas', '', { calorie_goal: S.calGoal, eaten_kcal_low: T.kLow, eaten_kcal_high: T.kHigh, meals_left: left.length ? left : ['Snacks'], ran_today: T.run, ramadan_mode: S.ramadan, fasting_today: T.fasting });
+    if (!Array.isArray(r.ideas)) r = { ideas: (left.length ? left : ['Snacks']).map((slot) => ({ slot, idea: DEMO_IDEAS[slot][0] })), note: '' };
+    $('ideasGo').disabled = false; $('ideasGo').textContent = 'Suggest again';
+    S.ideas = { date: dayKey(), list: r.ideas.slice(0, 5), note: r.note || '' }; save(); renderToday();
+  }
+
   function renderToday() {
     show('main');
     $('ramadanBtn').setAttribute('aria-pressed', String(!!S.ramadan));
@@ -378,11 +416,23 @@
     const T = dayTotals(dayKey());
     const resting = S.redFlag || S.nextRest || !hasRun();
     const runGoal = hasRun() ? planKm(S.step) : 0, waterGoal = S.ramadan ? 2.5 : 3, sleepGoal = 8;
+    const calGoal0 = !!S.goals?.cal;
+    const slotsLogged = new Set(logsFor(dayKey()).filter((l) => l.kind === 'meal').map((l) => l.slot)).size;
     const parts = [
       { label: 'Run', color: 'var(--c-run)', frac: resting ? (T.run ? 1 : 0) : T.run_km / runGoal, text: resting ? (T.run ? `${+T.run_km.toFixed(1)} km` : hasRun() ? 'Rest day' : 'No run logged') : `${+T.run_km.toFixed(1)} / ${runGoal} km` },
-      { label: S.ramadan ? 'Water, iftar to sehri' : 'Water', color: 'var(--c-water)', frac: T.water_l / waterGoal, text: `${+T.water_l.toFixed(1)} / ${waterGoal} L` },
+      ...(calGoal0 ? [S.calGoal
+        ? { label: 'Calories', color: 'var(--c-cal)', frac: ((T.kLow + T.kHigh) / 2) / S.calGoal, text: T.food ? `~${Math.round((T.kLow + T.kHigh) / 100) * 50} / ${S.calGoal.toLocaleString('en-IN')}` : `0 / ${S.calGoal.toLocaleString('en-IN')}` }
+        : { label: 'Calories, meals logged', color: 'var(--c-cal)', frac: slotsLogged / 4, text: T.food ? `${r50(T.kLow)}–${r50(T.kHigh)}` : 'None yet' }] : []),
       { label: 'Sleep', color: 'var(--c-sleep)', frac: (T.sleep_h || 0) / sleepGoal, text: `${T.sleep_h ?? 0} / ${sleepGoal} h` },
     ];
+    // Water glass: fills in 250 ml glasses towards 3 L (2.5 L between iftar and sehri in Ramadan)
+    const glasses = Math.round(waterGoal / 0.25);
+    $('glassFill').style.height = Math.min(100, (T.water_l / waterGoal) * 100) + '%';
+    $('glassMarks').innerHTML = Array.from({ length: glasses - 1 }, (_, i) => `<i style="bottom:${((i + 1) / glasses) * 100}%"></i>`).join('');
+    $('waterAmt').textContent = `${+T.water_l.toFixed(2)} L`;
+    $('waterGoal').textContent = `/ ${waterGoal} L`;
+    $('waterHint').textContent = S.ramadan ? 'Ramadan: drink this between iftar and sehri. One tap adds a glass (250 ml).' : T.water_l >= waterGoal ? 'Goal reached. Keep sipping if it is hot or you ran.' : `One tap adds a glass (250 ml). ${Math.ceil((waterGoal - T.water_l) / 0.25)} glasses to go.`;
+    $('waterMinus').disabled = T.water_l <= 0;
     $('rings').innerHTML = ringsSVG(parts);
     $('legend').innerHTML = parts.map((p) => `<li><i style="background:${p.color}"></i><span>${p.label}</span><b>${p.text}</b></li>`).join('');
     const mini = (label, val, sub) => `<div class="mini"><b>${val}</b><span>${label}${sub ? `<br><small>${sub}</small>` : ''}</span></div>`;
@@ -406,9 +456,10 @@
     $('runPlan').hidden = !hasRun();
 
     renderFood(T);
+    $('ideas').innerHTML = S.ideas?.date === dayKey() ? `<ul class="meals ideas">${S.ideas.list.map((i) => `<li><span><b class="slot">${esc(i.slot || '')}</b> ${esc(i.idea || '')}</span>${i.kcal_low ? `<b>${i.kcal_low}–${i.kcal_high}</b>` : ''}</li>`).join('')}</ul>${S.ideas.note ? `<p class="small">${esc(S.ideas.note)}</p>` : ''}` : '';
 
     // Coach card: the latest thing the coach said today
-    const todays = logsFor(dayKey()).filter((l) => l.kind !== 'meal');
+    const todays = logsFor(dayKey()).filter((l) => !['meal', 'water'].includes(l.kind));
     const last = todays[todays.length - 1];
     if (last) { $('coachMsg').textContent = last.parsed?.reply || ''; $('coachTime').textContent = 'replying to your check-in'; }
     else if (S.morning?.date === dayKey()) { $('coachMsg').textContent = S.morning.message; $('coachTime').textContent = 'today'; }
@@ -650,6 +701,11 @@
   });
   $('addGoal').addEventListener('click', openSetup);
   $('mealAdd').addEventListener('click', addMeal);
+  $('waterPlus').addEventListener('click', () => addWater(0.25));
+  $('waterMinus').addEventListener('click', () => addWater(-0.25));
+  $('calGoalSave').addEventListener('click', saveCalGoal);
+  $('calGoalClear').addEventListener('click', () => { delete S.calGoal; S.ideas = null; save(); $('calGoalMsg').textContent = 'Goal removed. Still keeping track.'; renderToday(); });
+  $('ideasGo').addEventListener('click', suggestMeals);
   $('mealText').addEventListener('input', (e) => autoGrow(e.target));
   $('segMeal').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (b) { mealSlot = b.dataset.v; document.querySelectorAll('#segMeal button').forEach((x) => x.setAttribute('aria-checked', String(x.dataset.v === mealSlot))); } });
   $('mealGroups').addEventListener('click', (e) => { const b = e.target.closest('[data-rm]'); if (!b) return; const [li, mi] = b.dataset.rm.split(':').map(Number); removeMeal(li, mi); });
