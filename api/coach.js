@@ -1,7 +1,13 @@
 // Serverless function (Vercel). Calls Google Gemini and returns structured JSON.
 // The API key lives ONLY in the host's environment variable GEMINI_API_KEY. Never commit it.
 
-const MODELS = [process.env.GEMINI_MODEL || 'gemini-flash-latest', 'gemini-2.5-flash'];
+// Tried in order. Thinking is switched off where the model allows it, so replies come back in a few seconds.
+const MODELS = [
+  ...(process.env.GEMINI_MODEL ? [{ id: process.env.GEMINI_MODEL, thinking: null }] : []),
+  { id: 'gemini-2.5-flash', thinking: { thinkingBudget: 0 } },
+  { id: 'gemini-2.5-flash-lite', thinking: { thinkingBudget: 0 } },
+  { id: 'gemini-flash-latest', thinking: null },
+];
 
 const PLAN_LADDER = `Plan steps (1 to 13):
 1 run 1 min / walk 1.5 min x 8
@@ -61,7 +67,7 @@ Return JSON: {"log": {"run_km": number|null, "run_min": number|null, "walk_break
 
 async function callGemini(model, key, body) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 25000);
+  const t = setTimeout(() => ctrl.abort(), 15000);
   try {
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
@@ -91,13 +97,17 @@ module.exports = async (req, res) => {
   };
 
   try {
-    let r, lastErr = '';
-    for (const model of MODELS) {
-      r = await callGemini(model, key, payload);
+    let r = null, lastErr = '';
+    for (const m of MODELS) {
+      const cfg = { ...payload.generationConfig, ...(m.thinking ? { thinkingConfig: m.thinking } : {}) };
+      try {
+        r = await callGemini(m.id, key, { ...payload, generationConfig: cfg });
+      } catch (e) { lastErr += `${m.id}: ${String(e).slice(0, 80)} | `; r = null; continue; } // timeout: try the next model
       if (r.ok) break;
-      lastErr = `${model}: ${r.status} ${(await r.text()).slice(0, 200)}`;
-      if (r.status !== 404) break; // only fall back to the next model if this one does not exist
+      lastErr += `${m.id}: ${r.status} ${(await r.text()).slice(0, 200)} | `;
+      if (r.status === 401 || r.status === 403) break; // bad key: no point trying other models
     }
+    if (!r) return res.status(502).json({ error: 'ai_unreachable', detail: lastErr });
     if (!r.ok) return res.status(502).json({ error: 'ai_error', detail: lastErr });
     const data = await r.json();
     const raw = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
