@@ -313,3 +313,23 @@ h1 { font-size: 46px; font-weight: 800; font-style: italic; margin: 14px 0 12px;
 .quick { display: flex; gap: 8px; flex-wrap: wrap; align-self: flex-start; margin-top: 2px; }
 .quick button { border: 1.5px solid var(--bib); background: transparent; color: var(--bib); border-radius: 999px; padding: 9px 16px; font-weight: 700; font-size: 15px; }
 .quick button:first-child { background: var(--bib); color: var(--bib-ink); }
+
+/* ---------- Steps on a running track ---------- */
+.steps-card { background: var(--surface); border-radius: var(--r-lg); padding: 16px 18px; margin: 10px 0 0; }
+.steps-head { display: flex; justify-content: space-between; align-items: center; }
+.steps-head .sec-title { color: var(--bib); margin: 0; }
+.steps-form { padding: 8px 0 0; }
+.steps-track { position: relative; margin: 10px 0 4px; }
+.steps-track svg { width: 100%; height: auto; display: block; }
+#stTrackOuter { stroke: var(--track); stroke-width: 18; }
+#stTrackLane { stroke: rgba(255,255,255,.35); stroke-width: 1; stroke-dasharray: 4 5; }
+#stProgress { stroke: var(--bib); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1); }
+.st-start { stroke: #fff; stroke-width: 3; }
+#stRunner { fill: var(--bib); stroke: var(--bg); stroke-width: 3; transition: cx 1s, cy 1s; }
+.steps-center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.steps-center b { font-family: var(--display); font-size: 40px; font-weight: 800; line-height: 1; }
+.steps-center span { font-size: 13px; color: var(--muted); font-weight: 600; }
+.steps-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.steps-foot .small { margin: 0; }
+.steps-foot .btn-small { margin-top: 0; white-space: nowrap; border-color: var(--bib); color: var(--bib); }
+@media (prefers-reduced-motion: reduce) { #stProgress, #stRunner { transition: none; } }

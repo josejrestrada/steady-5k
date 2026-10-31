@@ -531,10 +531,21 @@
     $('legend').innerHTML = parts.map((p) => `<li><i style="background:${p.color}"></i><span>${p.label}</span><b>${p.text}</b></li>`).join('');
     const mini = (label, val, sub) => `<div class="mini"><b>${val}</b><span>${label}${sub ? `<br><small>${sub}</small>` : ''}</span></div>`;
     $('miniStats').innerHTML = [
-      T.hasSteps ? mini('Steps', T.steps.toLocaleString('en-IN'), 'from your phone') : `<button class="mini mini-add" id="stepsAdd"><b>+ Steps</b><span>Tap to add<br><small>the number from your phone</small></span></button>`,
       S.goals?.cal ? '' : mini('Food', T.food ? `${Math.round(T.kLow / 50) * 50}–${Math.round(T.kHigh / 50) * 50}` : '—', 'kcal, approx.'),
       S.ramadan || T.fasting ? mini('Fast', T.fasting ? 'Yes' : '—', 'Ramadan mode') : '',
     ].join('');
+
+    // Steps: running-track progress towards his own step goal (optional; never drives the plan)
+    const sg = S.stepGoal || 0, frac = sg ? Math.min(1, T.steps / sg) : 0;
+    $('stepsNum').textContent = T.hasSteps ? T.steps.toLocaleString('en-IN') : '0';
+    $('stepsOf').textContent = sg ? (T.steps >= sg ? `Goal of ${sg.toLocaleString('en-IN')} reached 🎉` : `of ${sg.toLocaleString('en-IN')} steps`) : 'Tap Edit goal to set one';
+    const pp = $('stProgress'), L = pp.getTotalLength();
+    pp.style.strokeDasharray = L; pp.style.strokeDashoffset = L * (1 - frac);
+    const pt = pp.getPointAtLength(L * frac);
+    $('stRunner').setAttribute('cx', pt.x); $('stRunner').setAttribute('cy', pt.y);
+    $('stRunner').style.opacity = sg ? 1 : 0;
+    $('stepsHint').textContent = !T.hasSteps ? 'Read the number off your phone and add it here.' : sg && T.steps < sg ? `${(sg - T.steps).toLocaleString('en-IN')} to go. An easy walk counts.` : 'From your phone\'s step counter.';
+    $('stepsAdd').textContent = T.hasSteps ? 'Update steps' : '+ Add steps';
 
     // Calorie goal: food card (monitoring only). Whichever goal is in focus comes first.
     const calGoal = !!S.goals?.cal, calFocus = S.goal === 'cal';
@@ -866,8 +877,14 @@
   document.querySelectorAll('#tabbar button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
   $('thread').addEventListener('click', (e) => { const b = e.target.closest('[data-flow]'); if (b) answerFlow(b.dataset.flow); });
   $('tellCoach').addEventListener('click', () => { setTab('coach'); setTimeout(() => $('ciText').focus(), 50); });
-  $('miniStats').addEventListener('click', (e) => {
-    if (!e.target.closest('#stepsAdd')) return;
+  $('stepGoalEdit').addEventListener('click', () => { const f = $('stepGoalForm'); f.hidden = !f.hidden; if (!f.hidden) { $('stepGoalIn').value = S.stepGoal || ''; $('stepGoalIn').focus(); } });
+  $('stepGoalCancel').addEventListener('click', () => { $('stepGoalForm').hidden = true; });
+  $('stepGoalSave').addEventListener('click', () => {
+    const v = Math.round(+$('stepGoalIn').value);
+    if (!v) { delete S.stepGoal; } else if (v < 1000 || v > 40000) { toast('Pick a goal between 1,000 and 40,000 steps.'); return; } else { S.stepGoal = v; }
+    $('stepGoalForm').hidden = true; save(); renderToday(); toast(v ? `Step goal set: ${v.toLocaleString('en-IN')} a day.` : 'Step goal removed.');
+  });
+  $('stepsAdd').addEventListener('click', (e) => {
     setTab('coach'); const t = $('ciText'); t.value = 'Steps today: '; autoGrow(t);
     setTimeout(() => { t.focus(); t.setSelectionRange(t.value.length, t.value.length); }, 50);
   });

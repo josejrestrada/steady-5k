@@ -129,6 +129,33 @@
             </div>
           </div>
         </section>
+        <section class="steps-card" aria-label="Steps today">
+          <div class="steps-head">
+            <h3 class="sec-title">Steps</h3>
+            <button id="stepGoalEdit" class="g-edit">Edit goal</button>
+          </div>
+          <div class="g-form steps-form" id="stepGoalForm" hidden>
+            <label class="small" for="stepGoalIn">Your daily step goal</label>
+            <div class="goal-input"><input id="stepGoalIn" type="number" inputmode="numeric" min="1000" max="40000" step="500" placeholder="e.g. 8000"><button id="stepGoalSave" class="btn-small">Save</button><button id="stepGoalCancel" class="btn-small">Cancel</button></div>
+          </div>
+          <div class="steps-track">
+            <svg viewBox="0 0 300 130" id="stepsSvg" aria-hidden="true">
+              <path id="stTrackOuter" d="M70 12 H230 A53 53 0 0 1 230 118 H70 A53 53 0 0 1 70 12 Z" fill="none"/>
+              <path id="stTrackLane" d="M70 12 H230 A53 53 0 0 1 230 118 H70 A53 53 0 0 1 70 12 Z" fill="none"/>
+              <path id="stProgress" d="M150 12 H230 A53 53 0 0 1 230 118 H70 A53 53 0 0 1 70 12 H150" fill="none"/>
+              <line x1="150" y1="2" x2="150" y2="22" class="st-start"/>
+              <circle id="stRunner" r="8" cx="150" cy="12"/>
+            </svg>
+            <div class="steps-center">
+              <b id="stepsNum">0</b>
+              <span id="stepsOf">Set a goal</span>
+            </div>
+          </div>
+          <div class="steps-foot">
+            <p class="small" id="stepsHint">From your phone's step counter.</p>
+            <button id="stepsAdd" class="btn-small">+ Add steps</button>
+          </div>
+        </section>
         <div class="mini-stats" id="miniStats"></div>
 
         <section class="coach-card" aria-live="polite">
