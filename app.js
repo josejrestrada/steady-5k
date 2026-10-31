@@ -218,6 +218,13 @@
     return warm + block('Main run', `${sessionMinutes(n)} min`, main) + cool + `<div class="blk tips"><b>Tips</b><ul>${li(tips)}</ul></div>`;
   }
 
+  function progressNote() {
+    const left = SESSIONS_PER_STEP - S.atStep;
+    const runs = left === 1 ? 'One more good run' : `${left} good runs`;
+    if (S.step === LAST) return `Last step: run 5 km without stopping and you have reached the finish line. Planned for ${S.runsPerWeek} runs a week.`;
+    return `You are on step ${S.step} of 13. ${runs} at this step and you move up to step ${S.step + 1}. Planned for ${S.runsPerWeek} runs a week.`;
+  }
+
   function stepHTML(n) {
     const st = STEPS[n];
     const fmt = (m) => `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, '0')}`;
@@ -243,7 +250,7 @@
     $('track').setAttribute('aria-label', `Step ${S.step} of 13 on the way to 5K`);
     $('finishLead').textContent = S.done ? 'You did it:' : '5K non-stop by';
     $('finishDate').textContent = S.done ? '5K non-stop' : fmtDate(targetDate());
-    $('finishNote').textContent = S.done ? 'Next goal: 10K. Ask the coach when you are ready.' : `Step ${S.step} of 13. ${S.atStep} of ${SESSIONS_PER_STEP} sessions done at this step, ${S.runsPerWeek} runs a week.`;
+    $('finishNote').textContent = S.done ? 'Next goal: 10K. Ask the coach when you are ready.' : progressNote();
     // next session
     const total = (n) => sessionMinutes(n) + 16;
     if (S.redFlag) { $('nextLabel').textContent = 'Paused'; $('nextSession').innerHTML = '<span class="sw-text">No running until you feel OK</span>'; $('nextHint').textContent = 'See a doctor about the warning sign you mentioned.'; $('nextPlan').innerHTML = ''; }
