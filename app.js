@@ -377,11 +377,6 @@
         `<li><span>${esc(m.item)}</span><b>${m.kcal_low}–${m.kcal_high}</b><button class="rm" data-rm="${m.li}:${m.mi}" aria-label="Remove ${esc(m.item)}">×</button></li>`).join('')}</ul></div>`;
     }).join('');
     $('fuelNote').textContent = T.run ? 'You ran today, so make sure your meals have enough carbs and protein to recover.' : '';
-    let cb = ''; const cv = [];
-    for (let i = 6; i >= 0; i--) { const k = dayKey(addDays(new Date(), -i)); const D = dayTotals(k); cv.push([k, D.food ? Math.round((D.kLow + D.kHigh) / 2) : 0]); }
-    const cmax = Math.max(1000, ...cv.map((v) => v[1]));
-    for (const [k, v] of cv) cb += `<div class="wb ${k === dayKey() ? 'today' : ''}"><span>${v ? (v / 1000).toFixed(1) + 'k' : ''}</span><i style="height:${(v / cmax) * 70}%"></i>${new Date(k).toLocaleDateString('en-IN', { weekday: 'narrow' })}</div>`;
-    $('calbars').innerHTML = cb;
   }
 
   // Offline stand-in: typical Indian portions as ranges.
