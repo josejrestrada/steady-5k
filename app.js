@@ -250,7 +250,8 @@
     $('track').setAttribute('aria-label', `Step ${S.step} of 13 on the way to 5K`);
     $('finishLead').textContent = S.done ? 'You did it:' : '5K non-stop by';
     $('finishDate').textContent = S.done ? '5K non-stop' : fmtDate(targetDate());
-    $('finishNote').textContent = S.done ? 'Next goal: 10K. Ask the coach when you are ready.' : progressNote();
+    $('finishNote').textContent = S.done ? 'Next goal: 10K. Ask the coach when you are ready.' : '';
+    $('finishNote').hidden = !S.done;
     // next session
     const total = (n) => sessionMinutes(n) + 16;
     if (S.redFlag) { $('nextLabel').textContent = 'Paused'; $('nextSession').innerHTML = '<span class="sw-text">No running until you feel OK</span>'; $('nextHint').textContent = 'See a doctor about the warning sign you mentioned.'; $('nextPlan').innerHTML = ''; }
