@@ -108,7 +108,7 @@ Every screen shows a "not medical advice" notice, and only made-up data is used.
 | ID | Feature | Build now / Later / Never | Reason |
 |---|---|---|---|
 | F01 | Food photo to calories | Later | Rizwan ranked calories last, his food is home-cooked and easy to describe in words, and photo estimates of regional dishes are unreliable (D06, D11). Respondent A asked for it, so it is the first thing to add if users want more food help. |
-| F02 | Profile and goals | Build now (changed) | No form and no BMI: he describes his running in his own words and the AI sets his start step and finish-line date. The "how I want to look" reference image is **Never**: body-image targets do not fit his goal and carry real harm. |
+| F02 | Profile and goals | Build now (changed) | No profile form and no BMI. He picks one of the two goals he named, **5K non-stop** or **10K**, then describes his running in his own words; the AI sets his start step and finish date. Goals are saved, each with its own progress, so he just taps one when he opens the app. Open-ended goals ("get healthy") are left out on purpose (Q2). The "how I want to look" image is **Never**: body-image targets do not fit his goal and carry real harm. |
 | F03 | Activity tracking | Build now (running and steps) | Run distance, time and walk breaks come from his message. Steps are logged from what he reads off his phone ("7k steps"), because a browser cannot read the phone's step counter; he left steps out of his ranking, so they are shown but never drive the plan. Cycling: Never. |
 | F04 | Diet plan | Never (calorie deficit) / Build now (water) | He wants to become a runner, not lose weight, and a deficit plan for a fasting 22-year-old is a risk. The daily water target stays, because thirst is his biggest problem. |
 | F05 | Progress tracker | Build now (changed) | Progress means steps towards 5K non-stop and a finish-line date (Q1, reason 2). The fasting tracker becomes Ramadan mode (N01). Supplements and reward points: **Never** (Q1, reason 3). |
@@ -137,13 +137,13 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 6
 
 **The core experience**
 
-*First two minutes.* Rizwan opens the link and sees one question: "How's your running right now?" He types or says "I can run about 1.5 km before I need to walk, 3 days a week." In the live test the AI placed him on step 3 of 13 (run 2 minutes, walk 1.5 minutes, six times), set a finish line of mid-December for 5K non-stop, and confirmed where he starts. No sign-up, no form.
+*First two minutes.* Rizwan opens the link and picks his goal (5K non-stop, or 10K), then answers one question: "How's your running right now?" He types or says "I can run about 1.5 km before I need to walk, 3 days a week." In the live test the AI placed him on step 3 of 13 (run 2 minutes, walk 1.5 minutes, six times), set a finish line of mid-December for 5K non-stop, and confirmed where he starts. No sign-up, no form.
 
 *A normal day.* The coach's message is waiting when he opens the app, above three goal rings for run, water and sleep; the Plan tab gives the full warm-up, run and cool-down. In the evening he sends one check-in, typed or spoken: "ran 2.5k, walked twice, 7k steps, 3 bottles water, slept 1 to 7, rice and fish curry for lunch." The app fills in run, steps, water, sleep and an approximate calorie range, replies in two lines, and moves the plan up, holds it, or eases off. If he reports back pain, tomorrow gets easier; if he reports chest tightness, training pauses.
 
 *Screenshots.* Rendered from the deployed code (final design), replaying the replies the live AI gave at steady-5k.vercel.app on 31 October.
 
-| 1. Setup: one question, no form | 2. Today: goal rings for run, water and sleep | 3. Coach tab: evening check-in, logged and answered |
+| 1. Setup: pick a goal, then one question | 2. Today: goal rings for run, water and sleep | 3. Coach tab: evening check-in, logged and answered |
 |---|---|---|
 | <img src="docs/screenshots/1-setup.png" width="230"> | <img src="docs/screenshots/2-today.png" width="230"> | <img src="docs/screenshots/3-checkin.png" width="230"> |
 | **4. Plan tab: finish line and full session** | **5. Ramadan mode switches on by itself** | **6. Red flag pauses training** |

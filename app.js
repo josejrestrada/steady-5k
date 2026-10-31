@@ -3,19 +3,34 @@
 (() => {
   'use strict';
 
-  // ---------- Plan ladder (written for this project) ----------
-  const STEPS = [
-    null,
-    { run: 1, walk: 1.5, reps: 8 }, { run: 1.5, walk: 1.5, reps: 7 }, { run: 2, walk: 1.5, reps: 6 },
-    { run: 3, walk: 1.5, reps: 5 }, { run: 4, walk: 1.5, reps: 4 }, { run: 5, walk: 1, reps: 4 },
-    { run: 7, walk: 1, reps: 3 }, { run: 9, walk: 1, reps: 3 }, { run: 12, walk: 1, reps: 2 },
-    { run: 15, walk: 1, reps: 2 }, { nonstop: '20 min' }, { nonstop: '25 min' }, { nonstop: '5 km' },
-  ];
-  const LAST = 13;
+  // ---------- Goals and their plan ladders (written for this project) ----------
+  // Rizwan's own words: "run a full 5K at a single, steady pace without stopping… eventually stretch it to 10K."
+  const GOALS = {
+    '5k': {
+      title: 'Run 5K without stopping', short: '5K non-stop', tape: '5K',
+      blurb: 'From run–walk intervals to 5 km at one steady pace.',
+      steps: [null,
+        { run: 1, walk: 1.5, reps: 8 }, { run: 1.5, walk: 1.5, reps: 7 }, { run: 2, walk: 1.5, reps: 6 },
+        { run: 3, walk: 1.5, reps: 5 }, { run: 4, walk: 1.5, reps: 4 }, { run: 5, walk: 1, reps: 4 },
+        { run: 7, walk: 1, reps: 3 }, { run: 9, walk: 1, reps: 3 }, { run: 12, walk: 1, reps: 2 },
+        { run: 15, walk: 1, reps: 2 }, { nonstop: '20 min' }, { nonstop: '25 min' },
+        { nonstop: '5 km', final: true, mins: 35, km: 5 }],
+    },
+    '10k': {
+      title: 'Run 10K', short: '10K', tape: '10K',
+      blurb: 'For when 5K feels steady: build up to 10 km without stopping.',
+      steps: [null,
+        { nonstop: '30 min' }, { nonstop: '35 min' }, { nonstop: '40 min' }, { nonstop: '45 min' },
+        { nonstop: '50 min' }, { nonstop: '55 min' }, { nonstop: '60 min' },
+        { nonstop: '10 km', final: true, mins: 70, km: 10 }],
+    },
+  };
+  let GOAL = GOALS['5k'], STEPS = GOAL.steps, LAST = STEPS.length - 1;
+  function useGoal(id) { GOAL = GOALS[id] || GOALS['5k']; STEPS = GOAL.steps; LAST = STEPS.length - 1; }
   const SESSIONS_PER_STEP = 2;
   const stepText = (n) => {
     const s = STEPS[n];
-    if (s.nonstop) return n === LAST ? 'Run 5 km without stopping 🏁' : `Run ${s.nonstop} without stopping`;
+    if (s.nonstop) return s.final ? `Run ${s.nonstop} without stopping 🏁` : `Run ${s.nonstop} without stopping`;
     return `Run ${s.run} min · walk ${s.walk} min × ${s.reps}`;
   };
 
@@ -30,7 +45,13 @@
   const KEY = 'steady5k:v1';
   const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch { return null; } };
   let S = load();
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
+  // Each saved goal keeps its own place in its plan; check-ins (food, water, sleep) are shared.
+  const GOAL_FIELDS = ['step', 'atStep', 'runsPerWeek', 'done', 'nextRest', 'lastChangeDay', 'created', 'intro'];
+  function stash() { if (!S || !S.goal) return; S.goals = S.goals || {}; S.goals[S.goal] = Object.fromEntries(GOAL_FIELDS.map((k) => [k, S[k]])); }
+  function activate(id) { stash(); Object.assign(S, S.goals[id]); S.goal = id; useGoal(id); save(); }
+  if (S && !S.goal) { S.goal = '5k'; stash(); } // older saves had one goal
+  if (S) useGoal(S.goal);
+  const save = () => { try { stash(); localStorage.setItem(KEY, JSON.stringify(S)); } catch {} };
 
   // ---------- Helpers ----------
   const $ = (id) => document.getElementById(id);
@@ -131,7 +152,8 @@
     const recent = S.logs.slice(-4).map((l) => ({ date: l.date, said: l.text.slice(0, 200), action: l.parsed?.plan_action, red_flag: l.parsed?.red_flag }));
     return {
       today: dayKey(), time: new Date().toTimeString().slice(0, 5),
-      next_session: S.nextRest ? 'Rest day' : stepText(S.step), plan_step: `${S.step}/13`, sessions_done_at_step: `${S.atStep}/${SESSIONS_PER_STEP}`,
+      goal: GOAL.title, plan_ladder: STEPS.slice(1).map((_, i) => `${i + 1} ${stepText(i + 1)}`).join('; '),
+      next_session: S.nextRest ? 'Rest day' : stepText(S.step), plan_step: `${S.step}/${LAST}`, sessions_done_at_step: `${S.atStep}/${SESSIONS_PER_STEP}`,
       ramadan_mode: S.ramadan, days_since_last_run: daysSinceRun(), runs_per_week: S.runsPerWeek,
       paused_for_red_flag: !!S.redFlag, recent_checkins: recent,
     };
@@ -169,7 +191,7 @@
   // ---------- Full session breakdown (general guidance, not medical advice) ----------
   function sessionMinutes(n) {
     const s = STEPS[n];
-    if (s.nonstop) return n === LAST ? 35 : parseInt(s.nonstop, 10);
+    if (s.nonstop) return s.mins || parseInt(s.nonstop, 10);
     return Math.round(s.reps * (s.run + s.walk) - s.walk);
   }
   function sessionPlan(n, mode) {
@@ -199,7 +221,7 @@
     const s = STEPS[n];
     const main = s.nonstop
       ? [
-          n === LAST ? 'Run 5 km at one steady, easy pace. Start slower than you think you need to.' : `Run ${s.nonstop} without stopping, at an easy pace.`,
+          s.final ? `Run ${s.nonstop} at one steady, easy pace. Start slower than you think you need to.` : `Run ${s.nonstop} without stopping, at an easy pace.`,
           'Easy pace = you can still speak in short sentences. If you can only gasp single words, slow down.',
           'If you really must walk, walk 1 minute and then carry on. It still counts.',
         ]
@@ -218,17 +240,10 @@
     return warm + block('Main run', `${sessionMinutes(n)} min`, main) + cool + `<div class="blk tips"><b>Tips</b><ul>${li(tips)}</ul></div>`;
   }
 
-  function progressNote() {
-    const left = SESSIONS_PER_STEP - S.atStep;
-    const runs = left === 1 ? 'One more good run' : `${left} good runs`;
-    if (S.step === LAST) return `Last step: run 5 km without stopping and you have reached the finish line. Planned for ${S.runsPerWeek} runs a week.`;
-    return `You are on step ${S.step} of 13. ${runs} at this step and you move up to step ${S.step + 1}. Planned for ${S.runsPerWeek} runs a week.`;
-  }
-
   function stepHTML(n) {
     const st = STEPS[n];
     const fmt = (m) => `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, '0')}`;
-    if (st.nonstop) return `<span class="sw"><b>${n === LAST ? '5 km' : st.nonstop}</b><small>without stopping</small></span>`;
+    if (st.nonstop) return `<span class="sw"><b>${st.nonstop}</b><small>without stopping</small></span>`;
     return `<span class="sw"><b>${fmt(st.run)}</b><small>run</small></span><span class="sw walk"><b>${fmt(st.walk)}</b><small>walk</small></span><span class="sw reps"><b>×${st.reps}</b><small>rounds</small></span>`;
   }
 
@@ -236,8 +251,9 @@
   let tab = 'today';
   function show(view) {
     $('onboard').hidden = view !== 'onboard';
+    $('goals').hidden = view !== 'goals';
     $('main').hidden = view !== 'main';
-    $('ramadanBtn').hidden = view === 'onboard';
+    $('ramadanBtn').hidden = view !== 'main';
   }
   function setTab(t) {
     tab = t;
@@ -251,7 +267,7 @@
   // Planned running distance for a step, at an easy beginner pace of about 7 min per km.
   function planKm(n) {
     const st = STEPS[n];
-    if (n === LAST) return 5;
+    if (st.final) return st.km;
     const mins = st.nonstop ? parseInt(st.nonstop, 10) : st.run * st.reps;
     return Math.max(1, Math.round((mins / 7) * 10) / 10);
   }
@@ -270,6 +286,7 @@
     show('main');
     $('ramadanBtn').setAttribute('aria-pressed', String(!!S.ramadan));
     $('dayLabel').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+    $('goalName').textContent = GOAL.title;
     $('flagBanner').hidden = !S.redFlag;
 
     // Rings: run, water, sleep
@@ -307,10 +324,12 @@
     $('ringText').textContent = S.step;
     $('marks').innerHTML = Array.from({ length: LAST }, (_, i) => `<i class="${i + 1 < S.step ? 'done' : i + 1 === S.step ? 'now' : ''}" style="left:${(i / (LAST - 1)) * 100}%"></i>`).join('');
     $('runner').style.setProperty('--x', pct + '%');
-    $('track').setAttribute('aria-label', `Step ${S.step} of 13 on the way to 5K`);
-    $('finishLead').textContent = S.done ? 'You did it:' : '5K non-stop by';
-    $('finishDate').textContent = S.done ? '5K non-stop' : fmtDate(targetDate());
-    $('finishNote').textContent = S.done ? 'Next goal: 10K. Ask the coach when you are ready.' : '';
+    $('track').setAttribute('aria-label', `Step ${S.step} of ${LAST} on the way to ${GOAL.short}`);
+    $('tapeLabel').textContent = GOAL.tape;
+    $('ladderTitle').textContent = `All ${LAST} steps`;
+    $('finishLead').textContent = S.done ? 'You did it:' : `${GOAL.short} by`;
+    $('finishDate').textContent = S.done ? GOAL.short : fmtDate(targetDate());
+    $('finishNote').textContent = S.done ? (S.goal === '5k' ? 'Next goal: 10K. Add it from your goals.' : 'Keep running for fun, and pick a new goal when you like.') : '';
     $('finishNote').hidden = !S.done;
     $('planLabel').textContent = S.redFlag ? 'Paused' : S.nextRest ? 'Rest day' : `Next run: ${stepText(S.step)}`;
     $('nextPlan').innerHTML = S.redFlag ? '<p class="small">No session until you have seen a doctor about the warning sign, or you feel completely fine.</p>'
@@ -348,13 +367,46 @@
   }
 
   // ---------- Actions ----------
+  // ---------- Goals: pick, save, switch ----------
+  let pickedGoal = '5k';
+  function renderGoalChoice() {
+    $('goalChoice').innerHTML = Object.entries(GOALS).map(([id, g]) => {
+      const have = S?.goals?.[id];
+      return `<button class="goal-opt" role="radio" aria-checked="${id === pickedGoal}" data-goal="${id}" ${have ? 'disabled' : ''}>
+        <b>${g.title}</b><span>${have ? 'Already one of your goals' : g.blurb}</span></button>`;
+    }).join('');
+  }
+  function openSetup() {
+    const free = Object.keys(GOALS).find((id) => !S?.goals?.[id]);
+    if (!free) { toast('You already have both goals saved.'); return; }
+    pickedGoal = free; renderGoalChoice();
+    $('onBack').hidden = !S; $('onSample').hidden = !!S;
+    $('onText').value = '';
+    show('onboard'); window.scrollTo(0, 0);
+  }
+  function renderGoals() {
+    show('goals');
+    $('goalList').innerHTML = Object.entries(S.goals).map(([id, g]) => {
+      useGoal(id);
+      const st = S.goal === id ? S : g;
+      const prog = st.done ? 'Finished 🏁' : `Step ${st.step} of ${LAST}`;
+      return `<button class="goal-card" data-goal="${id}"><span class="g-tape">${GOALS[id].tape}</span><span class="g-text"><b>${GOALS[id].title}</b><span>${prog}</span></span><span class="g-go" aria-hidden="true">›</span></button>`;
+    }).join('');
+    useGoal(S.goal);
+    $('addGoal').hidden = Object.keys(GOALS).every((id) => S.goals[id]);
+  }
+
   async function onboard() {
     const text = $('onText').value.trim();
     if (!text) { toast('Tell me a little about your running first.'); return; }
     $('onGo').disabled = true; $('onGo').textContent = 'Building your plan…';
-    const r = await ai('onboard', text, { today: dayKey() });
-    S = { v: 1, created: dayKey(), step: clamp(+r.start_step || 3, 1, LAST), atStep: 0, runsPerWeek: clamp(+r.runs_per_week || 3, 2, 5), ramadan: !!r.ramadan, logs: [], intro: text };
-    save();
+    useGoal(pickedGoal);
+    const r = await ai('onboard', text, { today: dayKey(), goal: GOAL.title, plan_ladder: STEPS.slice(1).map((_, i) => `${i + 1} ${stepText(i + 1)}`).join('; ') });
+    const fresh = { step: clamp(+r.start_step || 1, 1, LAST), atStep: 0, runsPerWeek: clamp(+r.runs_per_week || 3, 2, 5), done: false, nextRest: false, lastChangeDay: null, created: dayKey(), intro: text };
+    if (!S) S = { v: 2, logs: [], ramadan: !!r.ramadan, goals: {} };
+    else stash();
+    S.goals[pickedGoal] = fresh;
+    Object.assign(S, fresh); S.goal = pickedGoal;
     $('onGo').disabled = false; $('onGo').textContent = 'Build my plan';
     S.morning = { date: dayKey(), message: r.reply || `Plan ready. Start with: ${stepText(S.step)}.` }; save();
     renderToday(); setTab('today');
@@ -392,7 +444,7 @@
     const d = (n) => dayKey(addDays(new Date(), -n));
     const L = (n, text, log, reply, action) => ({ date: d(n), at: Date.now() - n * 864e5, text, note: '', parsed: { log: { meals: [], symptoms: [], ...log }, reply, plan_action: action, red_flag: false } });
     S = {
-      v: 1, created: d(6), step: 5, atStep: 1, runsPerWeek: 3, ramadan: false, sample: true,
+      v: 2, goal: '5k', goals: {}, created: d(6), step: 5, atStep: 1, runsPerWeek: 3, ramadan: false, sample: true,
       logs: [
         L(6, 'Ran 2k, walked 3 times. 2 bottles water. Slept 1am to 7am. Rice, dal, fish curry for lunch.', { run_km: 2, walk_breaks: 3, water_l: 2, sleep_h: 6, meals: [{ item: 'rice, dal, fish curry', kcal_low: 550, kcal_high: 800 }] }, 'Solid start. Try to get one more bottle of water in tomorrow.', 'repeat'),
         L(4, 'aaj 2.5k bhaga, 2 baar ruka, paani 3 bottle, 7 ghante soya', { run_km: 2.5, walk_breaks: 2, water_l: 3, sleep_h: 7 }, 'Fewer stops than last time. Good water day too.', 'up'),
@@ -400,6 +452,7 @@
         L(1, 'Ran 2.8k, back felt a bit stiff after. 2.5 L water.', { run_km: 2.8, water_l: 2.5, symptoms: ['back stiffness'] }, 'Good run. Keep tomorrow easy, and see a physio if the back stiffness keeps coming back.', 'repeat'),
       ],
     };
+    useGoal('5k');
     S.morning = { date: dayKey(), message: 'Back was stiff yesterday, so today is your normal session, nice and easy. Get 3 bottles of water in before evening.' };
     save(); $('menu').hidden = true; renderToday(); setTab('today'); morning(true);
   }
@@ -425,6 +478,11 @@
   // ---------- Wire up ----------
   $('onGo').addEventListener('click', onboard);
   $('onSample').addEventListener('click', loadSample);
+  $('goalChoice').addEventListener('click', (e) => { const b = e.target.closest('[data-goal]'); if (!b || b.disabled) return; pickedGoal = b.dataset.goal; renderGoalChoice(); });
+  $('onBack').addEventListener('click', () => { S.goals && Object.keys(S.goals).length > 1 ? renderGoals() : (renderToday(), setTab('today')); });
+  $('goalList').addEventListener('click', (e) => { const b = e.target.closest('[data-goal]'); if (!b) return; if (b.dataset.goal !== S.goal) { activate(b.dataset.goal); S.morning = null; } renderToday(); setTab('today'); morning(); });
+  $('addGoal').addEventListener('click', openSetup);
+  $('goalSwitch').addEventListener('click', renderGoals);
   $('ciSend').addEventListener('click', checkin);
   $('ciText').addEventListener('input', (e) => autoGrow(e.target));
   $('ciText').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey && !matchMedia('(pointer: coarse)').matches) { e.preventDefault(); checkin(); } });
@@ -448,7 +506,8 @@
   }
 
   function start() {
-    if (!S) { show('onboard'); return; }
+    if (!S) { pickedGoal = '5k'; renderGoalChoice(); $('onBack').hidden = true; $('onSample').hidden = false; show('onboard'); return; }
+    if (S.goals && Object.keys(S.goals).length > 1) { renderGoals(); return; } // more than one goal: ask which one today
     renderToday(); setTab('today'); morning();
   }
   start();

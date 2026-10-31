@@ -31,12 +31,14 @@
     <!-- ONBOARDING -->
     <main id="onboard" class="view" hidden>
       <section class="hero">
+        <button id="onBack" class="btn-link back" hidden>Back</button>
         <div class="hero-lane" aria-hidden="true"><i></i><i></i><i></i><span class="hero-tape"></span></div>
-        <h1>Run 5K without stopping to walk.</h1>
-        <p class="lede">No forms. Tell me where your running is today, in your own words. I'll build the plan and set your finish line.</p>
+        <h1>What's your goal?</h1>
+        <div class="goal-choice" id="goalChoice" role="radiogroup" aria-label="Your goal"></div>
       </section>
       <section class="card">
         <label for="onText" class="label">How's your running right now?</label>
+        <p class="small field-hint">In your own words. I'll build the plan and set your finish line.</p>
         <div class="composer composer-lg">
           <textarea id="onText" rows="4" placeholder="e.g. I started 2 months ago, I can run about 1.5 km before I need to walk. I run 3 days a week, mostly evenings."></textarea>
           <button class="mic" data-target="onText" aria-label="Speak instead"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -47,12 +49,20 @@
       <p class="notice">Not medical advice. Steady does not diagnose or prescribe. If you have chest pain, faint, or feel dizzy, stop and see a doctor.</p>
     </main>
 
+    <!-- GOALS: pick one of your saved goals -->
+    <main id="goals" class="view" hidden>
+      <h1>Which goal today?</h1>
+      <div id="goalList" class="goal-list"></div>
+      <button id="addGoal" class="btn-link left">Add another goal</button>
+    </main>
+
     <!-- MAIN APP: four tabs -->
     <div id="main" hidden>
       <!-- TODAY -->
       <main id="tab-today" class="panel" aria-labelledby="t-today">
         <p id="dayLabel" class="day-label"></p>
         <h1 class="day-title">Today</h1>
+        <button id="goalSwitch" class="goal-chip"><span>Goal</span><b id="goalName">Run 5K without stopping</b><em>Change</em></button>
 
         <section id="flagBanner" class="flag" hidden>
           <strong>Training paused.</strong>
@@ -94,7 +104,7 @@
             <div class="lane-lines" aria-hidden="true"></div>
             <div class="marks" id="marks" aria-hidden="true"></div>
             <div class="runner" id="runner"><span class="bib">Step</span><b id="ringText">1</b></div>
-            <div class="tape" aria-hidden="true"><span>5K</span></div>
+            <div class="tape" aria-hidden="true"><span id="tapeLabel">5K</span></div>
           </div>
         </section>
         <section class="card">
@@ -102,7 +112,7 @@
           <div id="nextPlan"></div>
         </section>
         <section class="card">
-          <h3 class="sec-title">All 13 steps</h3>
+          <h3 class="sec-title" id="ladderTitle">All steps</h3>
           <ol class="ladder" id="ladder"></ol>
         </section>
       </main>

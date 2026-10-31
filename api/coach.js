@@ -11,7 +11,7 @@ const MODELS = [
   { id: 'gemini-flash-latest', thinking: null },
 ];
 
-const PLAN_LADDER = `Plan steps (1 to 13):
+const PLAN_LADDER = `Default plan, goal "Run 5K without stopping" (steps 1 to 13):
 1 run 1 min / walk 1.5 min x 8
 2 run 1.5 / walk 1.5 x 7
 3 run 2 / walk 1.5 x 6
@@ -24,7 +24,8 @@ const PLAN_LADDER = `Plan steps (1 to 13):
 10 run 15 / walk 1 x 2
 11 run 20 min non-stop
 12 run 25 min non-stop
-13 run 5 km non-stop (the finish line)`;
+13 run 5 km non-stop (the finish line)
+If the context names a different goal (for example "Run 10K") it also gives that goal's plan_ladder: use that ladder and that goal instead.`;
 
 const SYSTEM = `You are "Steady", the coach inside a prototype running app built for one person: Rizwan, 22, a college student in India who started running two months ago.
 His goal: run 5 km at one steady pace without stopping to walk, then 10 km. His struggles: stamina and back pain.
@@ -51,7 +52,7 @@ function prompt(mode, text, ctx) {
   if (mode === 'onboard') {
     return `He is setting up the app and describes his running now: """${text}"""
 Context: ${c}
-Choose the plan step he can already do comfortably (be conservative; if unclear choose a lower step). Guess runs_per_week from what he says (default 3, clamp 2-5). Set ramadan=true only if he says he is fasting now.
+His goal and its plan ladder are in the context. Choose the step of THAT ladder he can already do comfortably (be conservative; if unclear choose a lower step; if the goal is 10K and he cannot yet run 30 minutes non-stop, choose step 1 and say the 5K goal may suit him first). Guess runs_per_week from what he says (default 3, clamp 2-5). Set ramadan=true only if he says he is fasting now.
 Return JSON: {"start_step": integer 1-13, "runs_per_week": integer, "ramadan": boolean, "reply": string (max 2 sentences: confirm where he starts and that the first session is ready)}`;
   }
   if (mode === 'morning') {

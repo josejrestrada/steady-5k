@@ -204,3 +204,24 @@ h1 { font-size: 46px; font-weight: 800; font-style: italic; margin: 14px 0 12px;
 
 @media (prefers-reduced-motion: reduce) { .runner, .r-fg { transition: none; } .mic.on { animation: none; } }
 @media (max-width: 360px) { h1 { font-size: 38px; } .finish-title strong { font-size: 42px; } .sw b { font-size: 38px; } }
+
+/* ---------- Goals ---------- */
+.goal-choice { display: grid; gap: 10px; margin: 4px 0 18px; }
+.goal-opt { text-align: left; border: 2px solid var(--line); background: var(--surface); border-radius: var(--r-md); padding: 14px 16px; display: grid; gap: 2px; }
+.goal-opt b { font-family: var(--display); font-size: 24px; font-weight: 700; }
+.goal-opt span { font-size: 14px; color: var(--muted); }
+.goal-opt[aria-checked="true"] { border-color: var(--bib); background: var(--surface-2); }
+.goal-opt[aria-checked="true"] b { color: var(--bib); }
+.goal-opt:disabled { opacity: .5; cursor: default; }
+.field-hint { margin: -4px 0 12px; }
+.goal-list { display: grid; gap: 12px; margin: 6px 0 8px; }
+.goal-card { display: grid; grid-template-columns: 64px 1fr auto; gap: 14px; align-items: center; text-align: left; border: 0; background: var(--surface); border-radius: var(--r-lg); padding: 14px; }
+.goal-card .g-tape { height: 64px; border-radius: 14px; background: var(--track); display: grid; place-items: center; font-family: var(--display); font-weight: 800; font-style: italic; font-size: 22px; color: var(--bib); box-shadow: inset -6px 0 0 var(--bib); }
+.g-text b { display: block; font-family: var(--display); font-size: 24px; font-weight: 700; }
+.g-text span { font-size: 14px; color: var(--muted); }
+.g-go { font-size: 30px; color: var(--muted); }
+.goal-chip { display: flex; align-items: baseline; gap: 8px; width: 100%; text-align: left; border: 0; background: transparent; padding: 0; margin: -6px 0 14px; color: var(--ink-2); }
+.goal-chip span { font-size: 14px; color: var(--muted); font-weight: 600; }
+.goal-chip b { font-weight: 700; }
+.goal-chip em { margin-left: auto; font-style: normal; font-size: 14px; color: var(--c-run); font-weight: 700; }
+.btn-link.back { width: auto; padding: 4px 0 8px; text-decoration: none; color: var(--c-run); font-weight: 700; }
