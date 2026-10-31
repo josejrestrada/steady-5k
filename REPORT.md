@@ -54,7 +54,7 @@ My customer is **Rizwan, 22, a college student who started running two months ag
 - **Reason 3 (paywalls destroy trust):** he is one of the few people in my research who would pay, and only for real personalisation. That is the bar the app has to clear.
 - Generic apps fail hardest when life changes (Kidman et al. list "evolving needs" as a reason people leave). Ramadan is a predictable, month-long change that no app Rizwan uses accounts for.
 
-Choosing Rizwan also removes several class concerns: D03 (no target age group), D02 and D01 (too many features: he named five things he cares about and left out steps), D05 (wearables: he runs with his phone) and D09 (no celebrity avatars needed).
+Choosing Rizwan also removes class concerns D01–D03 (no target user, too many features), D05 (he runs with his phone) and D09 (no celebrity avatars).
 
 ## Q3. What does AI do in my app that ordinary software could not?
 
@@ -108,7 +108,7 @@ Every screen shows a "not medical advice" notice, and only made-up data is used.
 | ID | Feature | Build now / Later / Never | Reason |
 |---|---|---|---|
 | F01 | Food photo to calories | Later | Rizwan ranked calories last, his food is home-cooked and easy to describe in words, and photo estimates of regional dishes are unreliable (D06, D11). Respondent A asked for it, so it is the first thing to add if users want more food help. |
-| F02 | Profile and goals | Build now (changed) | No profile form and no BMI. He picks one of the two goals he named, **5K non-stop** or **10K**, then describes his running in his own words; the AI sets his start step and finish date. Goals are saved, each with its own progress, so he just taps one when he opens the app. Open-ended goals ("get healthy") are left out on purpose (Q2). The "how I want to look" image is **Never**: body-image targets do not fit his goal and carry real harm. |
+| F02 | Profile and goals | Build now (changed after the user test) | No form and no BMI. He writes his goals in his own words and the AI turns them into goals the app supports: 5K non-stop, 10K, or keeping track of calories. Goals are saved, editable, and all keep going; he picks one to focus on. Weight-loss or body-shape targets are declined (Q2, safety), as is the "how I want to look" image (**Never**). |
 | F03 | Activity tracking | Build now (running and steps) | Run distance, time and walk breaks come from his message. Steps are logged from what he reads off his phone ("7k steps"), because a browser cannot read the phone's step counter; he left steps out of his ranking, so they are shown but never drive the plan. Cycling: Never. |
 | F04 | Diet plan | Never (calorie deficit) / Build now (water) | He wants to become a runner, not lose weight, and a deficit plan for a fasting 22-year-old is a risk. The daily water target stays, because thirst is his biggest problem. |
 | F05 | Progress tracker | Build now (changed) | Progress means steps towards 5K non-stop and a finish-line date (Q1, reason 2). The fasting tracker becomes Ramadan mode (N01). Supplements and reward points: **Never** (Q1, reason 3). |
@@ -132,28 +132,31 @@ Every screen shows a "not medical advice" notice, and only made-up data is used.
 | N05 | Offline demo mode | Build now | If the AI call fails (D08), the app still logs and shows the plan, with a clear banner. |
 | N06 | Strava import | Later | He already records runs in Strava; importing them would save him retyping distance and time. |
 | N07 | Full session guide | Build now | Every run comes with a step-by-step warm-up, the main run with a pace cue ("you can speak in short sentences"), a cool-down with stretches, and tips (Ramadan timing, when to stop). Rizwan is two months into running and struggles with stamina and back pain; a bare "run 3 min, walk 1.5 min" assumes he knows how to warm up. It is folded away so the daily screen stays short (H4). |
+| N08 | Calorie-tracking goal | Build now (after the user test) | Rizwan asked to "monitor my calorie intake" alongside running (Q5). Awareness only: rough ranges per meal, a daily total and a 7-day chart, with no target, deficit or diet (F04 stays Never). |
 
-That is 9 of 18 class features built in some form, most of them reshaped, plus 6 new ones. Choosing one customer removed the reason for most of the rest.
+That is 9 of 18 class features built in some form, most of them reshaped, plus 7 new ones. Choosing one customer removed the reason for most of the rest.
 
 **The core experience**
 
-*First two minutes.* Rizwan opens the link and picks his goal (5K non-stop, or 10K), then answers one question: "How's your running right now?" He types or says "I can run about 1.5 km before I need to walk, 3 days a week." In the live test the AI placed him on step 3 of 13 (run 2 minutes, walk 1.5 minutes, six times), set a finish line of mid-December for 5K non-stop, and confirmed where he starts. No sign-up, no form.
+*First two minutes.* Rizwan opens the link and writes his goal in his own words ("run 5km straight and monitor my calorie intake"); the AI turns it into two goals. Two taps say how far he can run before walking and how often he can run, and the plan starts at step 3 of 13 with a finish line in mid-December. No sign-up, no form.
 
 *A normal day.* The coach's message is waiting when he opens the app, above three goal rings for run, water and sleep; the Plan tab gives the full warm-up, run and cool-down. In the evening he sends one check-in, typed or spoken: "ran 2.5k, walked twice, 7k steps, 3 bottles water, slept 1 to 7, rice and fish curry for lunch." The app fills in run, steps, water, sleep and an approximate calorie range, replies in two lines, and moves the plan up, holds it, or eases off. If he reports back pain, tomorrow gets easier; if he reports chest tightness, training pauses.
 
 *Screenshots.* Rendered from the deployed code (final design), replaying the replies the live AI gave at steady-5k.vercel.app on 31 October.
 
-| 1. Setup: pick a goal, then one question | 2. Today: goal rings for run, water and sleep | 3. Coach tab: evening check-in, logged and answered |
+| 1. Setup: his goal, in his own words | 2. Today: goal rings for run, water and sleep | 3. Coach tab: evening check-in, logged and answered |
 |---|---|---|
 | <img src="docs/screenshots/1-setup.png" width="230"> | <img src="docs/screenshots/2-today.png" width="230"> | <img src="docs/screenshots/3-checkin.png" width="230"> |
 | **4. Plan tab: finish line and full session** | **5. Ramadan mode switches on by itself** | **6. Red flag pauses training** |
 | <img src="docs/screenshots/4-full-session.png" width="230"> | <img src="docs/screenshots/5-ramadan.png" width="230"> | <img src="docs/screenshots/6-red-flag.png" width="230"> |
+| **7. After the test: goals read from his words, level by taps** | **8. Goals saved, editable, all kept going** | **9. Calorie goal in focus: food first, no target** |
+| <img src="docs/screenshots/7-goals-level.png" width="230"> | <img src="docs/screenshots/8-goal-list.png" width="230"> | <img src="docs/screenshots/9-food.png" width="230"> |
 
 **My three hardest calls:**
 
-1. **Pushing calories into the background.** Photo calories (F01) and a diet plan (F04) were the class's headline features, and Respondent A asked for photo logging. But Rizwan ranked calories last, his goal is running, not weight, and Q1 shows food logging is the chore that makes people quit. I chose rough calorie ranges from words, with no targets. *What would change my mind:* if Rizwan or other runners ask for food guidance after using it (he said he would pay for "personalized diet guidance"), I would add it, reviewed by a dietitian.
+1. **Pushing calories into the background.** Photo calories (F01) and a diet plan (F04) were the class's headline features, and Respondent A asked for photo logging. But Rizwan ranked calories last, his goal is running, not weight, and Q1 shows food logging is the chore that makes people quit. I chose rough calorie ranges from words, with no targets. *What would change my mind:* Rizwan asking for food help after using it. He did (Q5), so calorie tracking became a goal of its own, still awareness only; real diet guidance would need a dietitian.
 2. **"Message me first" in a browser.** Rizwan and Respondent B both asked for this. Real phone notifications need an installed app, and the brief requires no install. I chose a coach message already written when he opens the app. *What would change my mind:* if testing shows he forgets to open the app for days, opt-in web push or WhatsApp reminders become worth the extra setup.
-3. **How much control the AI gets over the plan.** A fixed plan is predictable but is exactly the one-size-fits-all approach that bores people (Q1, reason 2). A plan the AI rewrites freely is personal but could push a new runner too hard. I chose a middle path: the AI decides whether to move up, repeat, ease off or rest, and the code enforces the limits (a fixed 13-step ladder, two good sessions before moving up, at most one change a day, never moving up with pain, and a red-flag pause the AI cannot override). *What would change my mind:* if the Q3 tests show the AI is consistently sensible, it could adjust session lengths too; if it is erratic, I would narrow it further.
+3. **How much control the AI gets over the plan.** A fixed plan is the one-size-fits-all approach that bores people (Q1, reason 2); a plan the AI rewrites freely could push a new runner too hard. I chose a middle path: the AI decides whether to move up, repeat, ease off or rest, and the code enforces the limits (a fixed 13-step ladder, two good sessions before moving up, at most one change a day, never moving up with pain, and a red-flag pause the AI cannot override). *What would change my mind:* the Q3 tests showed it was too cautious, not reckless, so I loosened its judgement of a completed run rather than its limits.
 
 ## Q5. User test
 
@@ -161,7 +164,21 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 6
 
 **Who tested it, what they did, what confused them, and what I changed:**
 
-[To be completed after Rizwan's test on 31 October: what he did in the first two minutes, his check-in, what confused him, and the change I made in response.]
+**Rizwan** tried the live app on his own phone on 31 October. He opened the link and typed an answer to the first question, "How's your running right now?"
+
+**What confused him:**
+
+1. He asked what that question was for. The app never said why it needed to know.
+2. The app pointed to only one goal, running 5 km straight. He wants to work on two at the same time: "run 5 km straight and monitor my calorie intake".
+
+**What I changed:**
+
+1. The first screen now asks **"What's your goal?"**, in his own words. The AI turns his sentence into goals and politely declines anything it cannot help with ("lose 10 kg" was declined in testing).
+2. The starting-level question comes after the goal, says why it is asked ("so your running plan starts at the right level"), and is answered with taps.
+3. A **calorie-tracking goal**: rough ranges per meal and a 7-day chart, with no target or diet (N08).
+4. Goals are **saved, editable and all keep going**; he picks the one to focus on.
+
+The second point overturned a call from Q2 and Q4: he ranked calories last in the interview, but once tracking cost him nothing, he wanted it. The new version has not yet been re-tested with him.
 
 ## References
 
