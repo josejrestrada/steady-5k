@@ -373,9 +373,58 @@
     save(); renderToday();
   }
 
+  // ---------- 3D water glass (SVG): tapered tumbler, rising water, pour and ripple ----------
+  const G = { rimY: 16, baseY: 156, rimW: 44, baseW: 32, rimRy: 9, baseRy: 6, maxY: 30 };
+  let glassLevel = null, glassAnim = 0;
+  const gW = (y) => G.baseW + (G.rimW - G.baseW) * (G.baseY - y) / (G.baseY - G.rimY);
+  const gRy = (y) => G.baseRy + (G.rimRy - G.baseRy) * (G.baseY - y) / (G.baseY - G.rimY);
+  const levelY = (f) => G.baseY - f * (G.baseY - G.maxY);
+  function paintLevel(f) {
+    const y = levelY(f), w = gW(y), ry = gRy(y);
+    const body = f <= 0.001 ? '' : `M${60 - w} ${y} L${60 - G.baseW} ${G.baseY} A${G.baseW} ${G.baseRy} 0 0 0 ${60 + G.baseW} ${G.baseY} L${60 + w} ${y} A${w} ${ry} 0 0 1 ${60 - w} ${y}Z`;
+    $('waterBody').setAttribute('d', body);
+    const top = $('waterTop');
+    top.setAttribute('cy', y); top.setAttribute('rx', f <= 0.001 ? 0 : w); top.setAttribute('ry', f <= 0.001 ? 0 : ry);
+  }
+  function drawGlass(f, glasses) {
+    $('glassBack').setAttribute('d', `M${60 - G.rimW} ${G.rimY} L${60 - G.baseW} ${G.baseY} A${G.baseW} ${G.baseRy} 0 0 0 ${60 + G.baseW} ${G.baseY} L${60 + G.rimW} ${G.rimY} A${G.rimW} ${G.rimRy} 0 0 0 ${60 - G.rimW} ${G.rimY}Z`);
+    $('glassFront').setAttribute('d', `M${60 - G.rimW} ${G.rimY} L${60 - G.baseW} ${G.baseY} A${G.baseW} ${G.baseRy} 0 0 0 ${60 + G.baseW} ${G.baseY} L${60 + G.rimW} ${G.rimY} A${G.rimW} ${G.rimRy} 0 0 1 ${60 - G.rimW} ${G.rimY}`);
+    $('glassMarks').innerHTML = Array.from({ length: glasses - 1 }, (_, i) => {
+      const y = levelY((i + 1) / glasses), x = 60 + gW(y);
+      return `<path d="M${x - ((i + 1) % 4 ? 7 : 12)} ${y + 1} L${x - 2} ${y}" stroke="#fff" stroke-opacity="${(i + 1) % 4 ? 0.3 : 0.6}" stroke-width="1.4" stroke-linecap="round"/>`;
+    }).join('');
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (glassLevel === null || reduce) { glassLevel = f; paintLevel(f); return; }
+    const from = glassLevel, to = f, t0 = performance.now(), dur = 900;
+    glassLevel = f; cancelAnimationFrame(glassAnim);
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      paintLevel(from + (to - from) * e);
+      if (k < 1) glassAnim = requestAnimationFrame(step);
+    };
+    glassAnim = requestAnimationFrame(step);
+  }
+  function pour(f) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const y = levelY(Math.min(1, f)), st = $('stream'), rp = $('ripple');
+    st.setAttribute('height', y + 20); st.style.transition = 'none'; st.setAttribute('opacity', '1');
+    rp.setAttribute('cy', y); rp.setAttribute('rx', 4); rp.setAttribute('ry', 1.5); rp.setAttribute('opacity', '1');
+    const t0 = performance.now();
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / 900);
+      st.setAttribute('opacity', k < 0.55 ? 1 : Math.max(0, 1 - (k - 0.55) / 0.45));
+      st.setAttribute('width', 7 - 4 * k); st.setAttribute('x', 60 - (7 - 4 * k) / 2);
+      const w = gW(y) * 0.9 * k;
+      rp.setAttribute('rx', Math.max(4, w)); rp.setAttribute('ry', Math.max(1.5, gRy(y) * 0.9 * k)); rp.setAttribute('opacity', 1 - k);
+      if (k < 1) requestAnimationFrame(step); else st.setAttribute('height', 0);
+    };
+    requestAnimationFrame(step);
+  }
+
   function addWater(delta) {
     S.logs.push({ date: dayKey(), at: Date.now(), kind: 'water', text: delta > 0 ? '+1 glass' : '−1 glass', parsed: { log: { water_l: delta, meals: [], symptoms: [] } } });
     save(); renderToday();
+    if (delta > 0) { const T2 = dayTotals(dayKey()); pour(T2.water_l / (S.ramadan ? 2.5 : 3)); }
   }
 
   // Calorie goal: only Rizwan sets it; the app never suggests a number and refuses unsafe ones.
@@ -427,8 +476,7 @@
     ];
     // Water glass: fills in 250 ml glasses towards 3 L (2.5 L between iftar and sehri in Ramadan)
     const glasses = Math.round(waterGoal / 0.25);
-    $('glassFill').style.height = Math.min(100, (T.water_l / waterGoal) * 100) + '%';
-    $('glassMarks').innerHTML = Array.from({ length: glasses - 1 }, (_, i) => `<i style="bottom:${((i + 1) / glasses) * 100}%"></i>`).join('');
+    drawGlass(Math.min(1, T.water_l / waterGoal), glasses);
     $('waterAmt').textContent = `${+T.water_l.toFixed(2)} L`;
     $('waterGoal').textContent = `/ ${waterGoal} L`;
     $('waterHint').textContent = S.ramadan ? 'Ramadan: drink this between iftar and sehri. One tap adds a glass (250 ml).' : T.water_l >= waterGoal ? 'Goal reached. Keep sipping if it is hot or you ran.' : `One tap adds a glass (250 ml). ${Math.ceil((waterGoal - T.water_l) / 0.25)} glasses to go.`;

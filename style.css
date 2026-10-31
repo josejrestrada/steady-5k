@@ -293,3 +293,8 @@ h1 { font-size: 46px; font-weight: 800; font-style: italic; margin: 14px 0 12px;
 #calGoalMsg { margin: 8px 0 0; }
 .ideas .slot { display: block; font-family: var(--display); font-size: 16px; color: var(--c-water); }
 .ideas li span { color: var(--ink); }
+
+/* ---------- 3D water glass ---------- */
+.glass3d { width: 96px; margin: 0 auto; }
+.glass3d svg { width: 96px; height: auto; display: block; overflow: visible; }
+.water-card { grid-template-columns: 104px 1fr; }

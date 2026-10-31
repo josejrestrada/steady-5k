@@ -98,7 +98,27 @@
           <ul class="legend" id="legend"></ul>
         </section>
         <section class="water-card" aria-label="Water today">
-          <div class="glass" id="glass" aria-hidden="true"><div class="glass-fill" id="glassFill"></div><div class="glass-marks" id="glassMarks"></div></div>
+          <div class="glass3d" aria-hidden="true">
+            <svg viewBox="0 0 120 176" id="glassSvg">
+              <defs>
+                <linearGradient id="gGlass" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".25" stop-color="#fff" stop-opacity=".04"/><stop offset=".8" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#fff" stop-opacity=".14"/></linearGradient>
+                <linearGradient id="gWater" x1="0" x2="1"><stop offset="0" stop-color="#1BA89E"/><stop offset=".35" stop-color="#3FE0D3"/><stop offset=".7" stop-color="#2FD3C6"/><stop offset="1" stop-color="#159088"/></linearGradient>
+                <linearGradient id="gTop" x1="0" x2="1"><stop offset="0" stop-color="#7FF0E6"/><stop offset="1" stop-color="#A9F7F0"/></linearGradient>
+                <linearGradient id="gStream" x1="0" x2="1"><stop offset="0" stop-color="#2FD3C6" stop-opacity=".5"/><stop offset=".5" stop-color="#B8FFF8"/><stop offset="1" stop-color="#2FD3C6" stop-opacity=".5"/></linearGradient>
+              </defs>
+              <ellipse cx="60" cy="166" rx="40" ry="6" fill="#000" opacity=".35"/>
+              <path id="glassBack" fill="url(#gGlass)"/>
+              <ellipse id="rimBack" cx="60" cy="16" rx="44" ry="9" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="1.5"/>
+              <rect id="stream" x="56.5" y="-20" width="7" height="0" rx="3.5" fill="url(#gStream)" opacity="0"/>
+              <path id="waterBody" fill="url(#gWater)"/>
+              <ellipse id="waterTop" cx="60" rx="0" ry="0" fill="url(#gTop)"/>
+              <ellipse id="ripple" cx="60" rx="0" ry="0" fill="none" stroke="#E6FFFC" stroke-width="1.5" opacity="0"/>
+              <g id="glassMarks"></g>
+              <path id="glassFront" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M24 30 L30 148" stroke="#fff" stroke-opacity=".35" stroke-width="4" stroke-linecap="round"/>
+              <path d="M33 34 L37 120" stroke="#fff" stroke-opacity=".15" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
           <div class="water-info">
             <h3 class="sec-title">Water</h3>
             <p class="water-amt"><b id="waterAmt">0</b> <span id="waterGoal">/ 3 L</span></p>
