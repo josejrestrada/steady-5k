@@ -8,7 +8,7 @@
 
 - **45 one- and two-star reviews** from Trustpilot across three apps: Strava (22), MyFitnessPal (7) and HealthifyMe (16). Full table with quotes: [docs/q1-research-notes.md](docs/q1-research-notes.md). Caveat: Trustpilot reviewers are mostly paying customers, so billing complaints are probably over-represented.
 - **Three people**, by WhatsApp questionnaire (notes in [docs/](docs/)): **Rizwan** (22, my target customer, current but dissatisfied Strava user), **Respondent A** (quit HealthifyMe after one week) and **Respondent B** (tried eight fitness apps and stopped most of them).
-- **Two published sources:** Kidman et al. (2024), a scoping review of when and why adults abandon lifestyle apps, and Cordeiro et al. (2015), a study of 141 food loggers and 5,526 forum posts.
+- **Two published sources:** Kidman et al. (2024), a review of why adults abandon lifestyle apps, and Cordeiro et al. (2015), a study of 141 food loggers.
 
 **My three most important reasons, ranked:**
 
@@ -69,9 +69,9 @@ A form-based app would give Rizwan six input screens and a fixed plan; Q1 says t
 
 **What it does on its own, without being asked:**
 
-- **Speaks first.** When Rizwan opens the app, today's message is already written: the session, a water target and one nudge. A browser app cannot reliably send phone notifications without an install, so this is the honest version of "message me first" (see Q4, hardest call 2).
+- **Speaks first.** When Rizwan opens the app, today's message is already written: the session and one nudge (Q4, hardest call 2).
 - **Reschedules the plan.** If he misses runs, it rebuilds the remaining weeks and, if needed, moves the 5K date, without guilt-tripping (F09, catch-up planning).
-- **Switches to Ramadan mode** when his messages mention roza, sehri or iftar. Runs move to after iftar and the water target is split between iftar and sehri. It tells him it has switched, and he can switch it back.
+- **Switches to Ramadan mode** when he mentions roza, sehri or iftar: runs move to after iftar, water to between iftar and sehri. He can switch it back.
 
 **What it must never do:**
 
@@ -143,7 +143,7 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 8
 
 *First two minutes.* Rizwan opens the link and writes his goal in his own words ("run 5km straight and monitor my calorie intake"); the AI turns it into two goals. Two taps say how far he can run before walking and how often he can run, and the plan starts at step 3 of 13 with a finish line in mid-December. No sign-up, no form.
 
-*A normal day.* The coach's message is waiting when he opens the app, above three goal rings for run, water and sleep; the Plan tab gives the full warm-up, run and cool-down. In the evening he sends one check-in, typed or spoken: "ran 2.5k, walked twice, 7k steps, 3 bottles water, slept 1 to 7, rice and fish curry for lunch." The app fills in run, steps, water, sleep and an approximate calorie range, replies in two lines, and moves the plan up, holds it, or eases off. If he reports back pain, tomorrow gets easier; if he reports chest tightness, training pauses.
+*A normal day.* The coach's message is waiting above his goal rings; the Plan tab has the full session. In the evening he sends one check-in, typed or spoken: "ran 2.5k, walked twice, 7k steps, 3 bottles water, slept 1 to 7, rice and fish curry for lunch." The app fills in run, steps, water, sleep and an approximate calorie range, replies in two lines, and moves the plan up, holds it, or eases off. If he reports back pain, tomorrow gets easier; if he reports chest tightness, training pauses.
 
 *Screenshots.* Rendered from the deployed code (final design), replaying the replies the live AI gave at steady-5k.vercel.app on 31 October.
 
@@ -183,7 +183,9 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 8
 
 Separately, and as my own call from his Q2 answer rather than from the test, I added an optional calorie goal he sets himself, with meal ideas (F04), and a water glass (N09).
 
-The second point overturned a call from Q2 and Q4: he ranked calories last in the interview, but once tracking cost him nothing, he wanted it. The new version has not yet been re-tested with him.
+**Second test, same evening.** He did not know how to log his steps, and could not find "Tell the coach about your day" after scrolling. I pinned that button above the tab bar on Today, labelled "Run, steps, food, water, sleep", and made an empty Steps tile open the coach with "Steps today:" already typed.
+
+The second point overturned a call from Q2 and Q4: he ranked calories last in the interview, but once tracking cost him nothing, he wanted it.
 
 ## References
 

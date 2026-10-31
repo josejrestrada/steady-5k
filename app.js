@@ -485,7 +485,7 @@
     $('legend').innerHTML = parts.map((p) => `<li><i style="background:${p.color}"></i><span>${p.label}</span><b>${p.text}</b></li>`).join('');
     const mini = (label, val, sub) => `<div class="mini"><b>${val}</b><span>${label}${sub ? `<br><small>${sub}</small>` : ''}</span></div>`;
     $('miniStats').innerHTML = [
-      mini('Steps', T.hasSteps ? T.steps.toLocaleString('en-IN') : '—', 'from your phone'),
+      T.hasSteps ? mini('Steps', T.steps.toLocaleString('en-IN'), 'from your phone') : `<button class="mini mini-add" id="stepsAdd"><b>+ Steps</b><span>Tap to add<br><small>the number from your phone</small></span></button>`,
       S.goals?.cal ? '' : mini('Food', T.food ? `${Math.round(T.kLow / 50) * 50}–${Math.round(T.kHigh / 50) * 50}` : '—', 'kcal, approx.'),
       S.ramadan || T.fasting ? mini('Fast', T.fasting ? 'Yes' : '—', 'Ramadan mode') : '',
     ].join('');
@@ -772,6 +772,11 @@
   document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.go)));
   document.querySelectorAll('#tabbar button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
   $('tellCoach').addEventListener('click', () => { setTab('coach'); setTimeout(() => $('ciText').focus(), 50); });
+  $('miniStats').addEventListener('click', (e) => {
+    if (!e.target.closest('#stepsAdd')) return;
+    setTab('coach'); const t = $('ciText'); t.value = 'Steps today: '; autoGrow(t);
+    setTimeout(() => { t.focus(); t.setSelectionRange(t.value.length, t.value.length); }, 50);
+  });
   function confirmReset() {
     const b = document.querySelector('[data-act="reset"]');
     if (b.dataset.armed) return true;
