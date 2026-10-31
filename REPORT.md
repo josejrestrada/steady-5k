@@ -16,7 +16,7 @@
 
 2. **The app tracks the past instead of pointing at the person's own goal, so progress feels invisible and they get bored.** Rizwan on Strava: "It focuses heavily on leaderboards and personal records rather than my future targets or anything truly personalized." Respondent B got bored of most apps but finished the one with a clear target and an end date: "Six Pack in 30 Days was effective and reached goal." HealthifyMe reviewers call plans generic (#34, #39, #43); Kidman et al. name lack of personalisation. My reading: "boring" is the symptom; the cause is a tracker with no plan forward.
 
-3. **Paywalls and billing traps destroy trust.** About 21 of the 45 reviews are about money: Strava's "way too much stuff now behind a paywall" (#12), charges after cancelling (#20), an accidental yearly subscription on MyFitnessPal (#26), and HealthifyMe refunds that never came (#30–#36). Respondent B's moment of quitting: "When they ask for premium, got bored, ads." Yet Rizwan would pay ₹500 a month "if the app offered genuinely personalized diet guidance and structured training plans" (B: at most ₹100; A: never). People object less to price than to paying before the app proves it is personal, and to surprise charges.
+3. **Paywalls and billing traps destroy trust.** About 21 of the 45 reviews are about money: Strava's "way too much stuff now behind a paywall" (#12), charges after cancelling (#20), and HealthifyMe refunds that never came (#30–#36). Respondent B's moment of quitting: "When they ask for premium, got bored, ads." Yet Rizwan would pay ₹500 a month "if the app offered genuinely personalized diet guidance and structured training plans" (B: at most ₹100; A: never). People object less to price than to paying before the app proves it is personal, and to surprise charges.
 
 **The class guesses, tested**
 
@@ -33,11 +33,11 @@
 
 My customer is **Rizwan, 22, a college student who started running two months ago** after going to a marathon event with friends.
 
-- **What he wants to get done:** "be able to run a full 5K at a single, steady pace without stopping to walk", and then stretch to 10K. He is not trying to lose weight or count everything; he wants to become a runner.
+- **What he wants to get done:** "be able to run a full 5K at a single, steady pace without stopping to walk", then 10K. He wants to become a runner, not to lose weight.
 - **What gets in his way:** stamina, and back pain.
 - **His routine:** brunch at college, other meals at home, two or three meals out a week. Home-cooked food is exactly what calorie apps handle worst (Q1, reason 1).
 - **Ramadan:** he is Muslim and fasts every Ramadan. He avoids running while fasting ("thirst, without a doubt" is the hardest part) but still plays football and badminton tournaments while fasting. He ranks fasting first among the things he wants help with.
-- **What he has tried:** Strava, for pace, time and distance. He has not tried any food, water or sleep app.
+- **What he has tried:** Strava only, for pace, time and distance.
 - **Why it has not worked:** Strava tells him what he did, not what to do next. "It focuses heavily on leaderboards and personal records rather than my future targets or anything truly personalized." It has no plan to get him to 5K, nothing for his back pain, and nothing for the month a year when his whole routine changes.
 - **How he wants to be helped:** by typing or voice ("sometimes I feel too tired or lazy to type"), with the app to "message me first". He would pay about ₹500 a month for real personalisation.
 
@@ -141,7 +141,7 @@ Every screen shows a "not medical advice" notice, and only made-up data is used.
 | N10 | Session variety | Build now | Repeating the same session is the boredom Q1 (reason 2) warns about, but raising the load daily risks injury for a new runner with back pain. So the difficulty only changes by the plan rules, while the style rotates after each run: classic, pyramid, focus run (one technique cue) and new route, with the same total running time. |
 | N11 | Ask to move up a level | Build now | He can ask the coach to make it harder. The coach never decides alone: it holds the level if he logged pain in the last 3 days, otherwise asks about pain, shows the next level and moves him up only when he taps "Yes, move me up". Plan stages are now called levels, so "steps" only means walking steps. |
 
-That is 9 of 18 class features built in some form, most of them reshaped, plus 10 new ones. Choosing one customer removed the reason for most of the rest.
+That is 9 of 18 class features built in some form, most of them reshaped, plus 10 new ones. Choosing one customer removed the reason for most of the rest. **A risk I name myself:** the app grew during testing. Each addition answers something Rizwan said or did, but five tabs may now be too much for one runner (D02, too many features); with more time I would test which ones he actually opens and cut the rest.
 
 **The core experience**
 
@@ -161,7 +161,7 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 1
 
 **My three hardest calls:**
 
-1. **Pushing calories into the background.** Photo calories (F01) and a diet plan (F04) were the class's headline features, and Respondent A asked for photo logging. But Rizwan ranked calories last, his goal is running, not weight, and Q1 shows food logging is the chore that makes people quit. I chose rough calorie ranges from words, with no targets. *What would change my mind:* Rizwan asking for food help after using it. He did (Q5), so I added a calorie tracker, then an optional goal he sets himself with meal ideas, because in Q2 he said he would pay for "personalized diet guidance". The app never proposes a number and refuses goals under 1,800 kcal; a dietitian should review this before real use.
+1. **Pushing calories into the background.** Photo calories (F01) and a diet plan (F04) were the class's headline features, but Rizwan ranked calories last and Q1 shows food logging is the chore that makes people quit. I chose rough ranges from words, with no targets. *What would change my mind:* Rizwan asking for food help after using it. He did (Q5), so I added a calorie tracker, then an optional goal he sets himself with meal ideas, because in Q2 he said he would pay for "personalized diet guidance". The app never proposes a number and refuses goals under 1,800 kcal; a dietitian should review this before real use.
 2. **"Message me first" in a browser.** Rizwan and Respondent B asked for this, but phone notifications need an installed app. I chose a coach message already written when he opens the app. *What would change my mind:* if testing shows he forgets to open the app for days, opt-in web push or WhatsApp reminders become worth the extra setup.
 3. **How much control the AI gets over the plan.** A fixed plan is the one-size-fits-all approach that bores people (Q1, reason 2); a plan the AI rewrites freely could push a new runner too hard. I chose a middle path: the AI decides whether to move up, repeat, ease off or rest, and the code enforces the limits (a fixed 13-step ladder, two good sessions before moving up, at most one change a day, never moving up with pain, and a red-flag pause the AI cannot override). He can ask to move up, but only after a pain check and his own confirmation (N11). *What would change my mind:* the Q3 tests showed it was too cautious, not reckless, so I loosened its judgement of a completed run rather than its limits.
 
@@ -171,11 +171,11 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 1
 
 **Who tested it, what they did, what confused them, and what I changed:**
 
-**Rizwan** tried the live app on his own phone on 31 October. He opened the link and typed an answer to the first question, "How's your running right now?"
+**Rizwan** tried the live app on his own phone on 31 October. He gave his feedback verbally, so it is written down from memory rather than quoted, except where noted. He opened the link and typed an answer to the first question, "How's your running right now?"
 
 **What confused him:**
 
-1. He asked what that question was for. The app never said why it needed to know.
+1. He asked, in his words, "what's the use of it?" The app never said why it needed to know.
 2. The app pointed to only one goal, running 5 km straight. He wants to work on two at the same time: "run 5 km straight and monitor my calorie intake".
 
 **What I changed:**
@@ -185,11 +185,11 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 1
 3. A **calorie tracker**: a Food tab where he adds what he ate by meal, typed or spoken; the AI estimates each item as a range. No target or diet (N08).
 4. Goals are **saved, editable and all keep going**; he picks the one to focus on.
 
-Separately, and as my own call from his Q2 answer rather than from the test, I added an optional calorie goal he sets himself, with meal ideas (F04), and a water glass (N09).
+Separately, as my own call from his Q2 answer, I added an optional calorie goal with meal ideas (F04) and a water glass (N09).
 
-**Second test, same evening.** He did not know how to log his steps, and could not find "Tell the coach about your day" after scrolling. I pinned that button above the tab bar on Today, labelled "Run, steps, food, water, sleep", and made an empty Steps tile open the coach with "Steps today:" already typed.
+**Second test, same evening.** He did not know how to log his steps, and could not find "Tell the coach about your day" after scrolling. I pinned that button above the tab bar, labelled "Run, steps, food, water, sleep", and made the Steps tile open the coach with "Steps today:" typed.
 
-**Third test.** His screenshot showed the coach asking "Did you manage to get your run in today?" four times while he kept answering "yes": the AI saw each message alone. It now receives the day's conversation, never repeats a question, logs a confirmed session, and offers "Yes, the full session / Part of it / No run today" buttons (test 16).
+**Third test.** His screenshot showed the coach asking "Did you manage to get your run in today?" four times while he kept answering "yes": the AI saw each message alone. It now reads the day's conversation, never repeats a question, and offers quick-reply buttons (test 16).
 
 The second point overturned a call from Q2 and Q4: he ranked calories last in the interview, but once tracking cost him nothing, he wanted it.
 
