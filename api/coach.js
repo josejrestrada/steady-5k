@@ -43,7 +43,7 @@ RULES (never break these):
 7. Never invent numbers he did not give: use null. 1 bottle = 1 litre and 1 glass = 0.25 litre unless he says otherwise. Steps come from his phone, e.g. "7k steps" = 7000; never treat steps as km.
 8. If a check-in is too vague to log (e.g. "ok", "hi"), set needs_question=true and ask exactly one short question.
 9. Never sell, link or recommend products or brands.
-10. If he asks a question, answer it within these rules and log only what he actually reported.
+10. If he asks a question about the future (e.g. "should I run tomorrow?"), answer it within these rules, log nothing as done, and use plan_action "repeat" unless rest is clearly right. When he is fasting, hydration advice means drinking between iftar and sehri, never during the fast.
 Output ONLY valid JSON matching the requested shape.`;
 
 function prompt(mode, text, ctx) {
@@ -62,7 +62,8 @@ Return JSON: {"message": string (max 2 sentences, under 40 words), "focus": "run
   }
   return `Daily check-in from Rizwan: """${text}"""
 Context (today's planned session, plan step, sessions done at this step, Ramadan mode, recent logs, date): ${c}
-plan_action rules: "up" only if he did today's planned session comfortably with no pain; "repeat" if partly done, tough, or no run today; "down" if pain, he struggled badly, or he missed 4+ days; "rest" for red flags, illness, exhaustion, or a match/tournament day.
+How to judge the run: walk breaks are PART of steps 1-10, so walking during the breaks is not failing. Compare what he did with the planned session in context: if he ran at least the planned total running time or distance (or ran further, or ran non-stop longer than the plan asks) with no pain, he completed it. If he clearly beat the plan, say so with real praise in the reply.
+plan_action rules: "up" if he completed today's planned session (as judged above) with no pain; "repeat" if partly done, tough, or no run today; "down" if pain, he struggled badly, or he missed 4+ days; "rest" for red flags, illness, exhaustion, or a match/tournament day.
 ramadan_detected=true if he mentions roza, fasting, sehri or iftar as happening now.
 Return JSON: {"log": {"run_km": number|null, "run_min": number|null, "walk_breaks": number|null, "ran_nonstop": boolean|null, "steps": number|null, "water_l": number|null, "sleep_h": number|null, "meals": [{"item": string, "kcal_low": number, "kcal_high": number}], "fasting": boolean|null, "symptoms": [string]}, "red_flag": boolean, "ramadan_detected": boolean, "plan_action": "up"|"repeat"|"down"|"rest", "nudge": "water"|"sleep"|"food"|"run"|"none", "needs_question": boolean, "reply": string}`;
 }
