@@ -160,7 +160,7 @@
     return addDays(new Date(), Math.max(days, S.step === LAST ? 0 : 2));
   }
   function context() {
-    const recent = S.logs.slice(-4).map((l) => ({ date: l.date, said: l.text.slice(0, 200), action: l.parsed?.plan_action, red_flag: l.parsed?.red_flag }));
+    const recent = S.logs.filter((l) => l.kind !== 'meal').slice(-4).map((l) => ({ date: l.date, said: l.text.slice(0, 200), action: l.parsed?.plan_action, red_flag: l.parsed?.red_flag }));
     return {
       today: dayKey(), time: new Date().toTimeString().slice(0, 5),
       goals: Object.keys(S.goals || {}).map(labelOf), goal_in_focus: S.goal ? labelOf(S.goal) : '', running_goal: hasRun() ? GOAL.title : 'none', plan_ladder: STEPS.slice(1).map((_, i) => `${i + 1} ${stepText(i + 1)}`).join('; '),
@@ -268,7 +268,7 @@
   }
   function setTab(t) {
     tab = t;
-    for (const n of ['today', 'plan', 'coach', 'week']) $('tab-' + n).hidden = n !== t;
+    for (const n of ['today', 'plan', 'coach', 'food', 'week']) $('tab-' + n).hidden = n !== t;
     document.querySelectorAll('#tabbar button').forEach((b) => b.toggleAttribute('aria-current', b.dataset.tab === t));
     $('dock').hidden = t !== 'coach';
     $('tabbar').hidden = false;
@@ -291,6 +291,80 @@
         `<circle cx="${C}" cy="${C}" r="${r}" class="r-fg" style="stroke:${p.color};stroke-dasharray:${len};stroke-dashoffset:${len * (1 - f)}"/>`;
     }).join('');
     return `<svg viewBox="0 0 180 180" role="img" aria-label="${parts.map((p) => `${p.label} ${p.text}`).join(', ')}">${arcs}</svg>`;
+  }
+
+  // ---------- Food tab: calorie tracker (rough ranges, no targets) ----------
+  const SLOTS = ['Breakfast', 'Lunch', 'Snacks', 'Dinner'];
+  const slotNow = () => { const h = new Date().getHours(); return h < 11 ? 'Breakfast' : h < 16 ? 'Lunch' : h < 19 ? 'Snacks' : 'Dinner'; };
+  let mealSlot = slotNow();
+  const r50 = (n) => Math.round(n / 50) * 50;
+
+  function renderFood(T) {
+    document.querySelectorAll('#segMeal button').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.v === mealSlot)));
+    $('foodDayTotal').innerHTML = T.food ? `<b>${r50(T.kLow)}–${r50(T.kHigh)}</b> kcal today, approx.` : 'Nothing logged yet today. Add what you ate above.';
+    const groups = {};
+    S.logs.forEach((l, li) => {
+      if (l.date !== dayKey()) return;
+      (l.parsed?.log?.meals || []).forEach((m, mi) => {
+        const g = l.kind === 'meal' ? (l.slot || 'Snacks') : 'From your check-ins';
+        (groups[g] = groups[g] || []).push({ ...m, li, mi });
+      });
+    });
+    const order = [...SLOTS, 'From your check-ins'].filter((g) => groups[g]);
+    $('mealGroups').innerHTML = order.map((g) => {
+      const lo = groups[g].reduce((a, m) => a + (+m.kcal_low || 0), 0), hi = groups[g].reduce((a, m) => a + (+m.kcal_high || 0), 0);
+      return `<div class="meal-group"><div class="mg-h"><b>${g}</b><span>${r50(lo)}–${r50(hi)} kcal</span></div><ul class="meals">${groups[g].map((m) =>
+        `<li><span>${esc(m.item)}</span><b>${m.kcal_low}–${m.kcal_high}</b><button class="rm" data-rm="${m.li}:${m.mi}" aria-label="Remove ${esc(m.item)}">×</button></li>`).join('')}</ul></div>`;
+    }).join('');
+    $('fuelNote').textContent = T.run ? 'You ran today, so make sure your meals have enough carbs and protein to recover.' : '';
+    let cb = ''; const cv = [];
+    for (let i = 6; i >= 0; i--) { const k = dayKey(addDays(new Date(), -i)); const D = dayTotals(k); cv.push([k, D.food ? Math.round((D.kLow + D.kHigh) / 2) : 0]); }
+    const cmax = Math.max(1000, ...cv.map((v) => v[1]));
+    for (const [k, v] of cv) cb += `<div class="wb ${k === dayKey() ? 'today' : ''}"><span>${v ? (v / 1000).toFixed(1) + 'k' : ''}</span><i style="height:${(v / cmax) * 70}%"></i>${new Date(k).toLocaleDateString('en-IN', { weekday: 'narrow' })}</div>`;
+    $('calbars').innerHTML = cb;
+  }
+
+  // Offline stand-in: typical Indian portions as ranges.
+  const FOOD_DB = [
+    [/roti|chapati|phulka/, 'roti', 80, 120], [/paratha/, 'paratha', 200, 300], [/naan/, 'naan', 250, 350],
+    [/biryani/, 'biryani (plate)', 500, 900], [/rice|chawal/, 'rice (bowl)', 200, 300], [/dal/, 'dal (bowl)', 150, 250],
+    [/sabzi|bhindi|aloo|bhaji|vegetable/, 'sabzi (bowl)', 100, 200], [/chicken/, 'chicken curry (bowl)', 250, 400],
+    [/fish/, 'fish curry (bowl)', 200, 350], [/egg|anda/, 'egg', 70, 90], [/dosa/, 'dosa', 150, 250], [/idli/, 'idli', 60, 90],
+    [/poha/, 'poha (plate)', 250, 350], [/upma/, 'upma (plate)', 250, 350], [/samosa/, 'samosa', 150, 250], [/pav|bhaji/, 'pav bhaji', 400, 600],
+    [/chai|tea/, 'chai', 80, 120], [/coffee/, 'coffee with milk', 60, 120], [/banana|kela/, 'banana', 90, 120], [/apple/, 'apple', 70, 100],
+    [/dates|khajur/, 'dates (3)', 60, 80], [/pizza/, 'pizza (slice)', 250, 350], [/burger/, 'burger', 400, 600], [/coke|cold drink|soda/, 'cold drink', 130, 160],
+    [/milk|doodh/, 'milk (glass)', 120, 160], [/curd|dahi/, 'curd (bowl)', 80, 120], [/salad/, 'salad', 50, 120],
+  ];
+  function demoMeal(text) {
+    const parts = text.toLowerCase().split(/,| and | aur |\+|&/).map((x) => x.trim()).filter(Boolean);
+    const meals = [];
+    for (const part of parts) {
+      const hit = FOOD_DB.find(([re]) => re.test(part)); if (!hit) continue;
+      const n = +((part.match(/\d+/) || [1])[0]) || 1;
+      meals.push({ item: n > 1 ? `${n} × ${hit[1]}` : hit[1], kcal_low: hit[2] * n, kcal_high: hit[3] * n });
+    }
+    return { meals, reply: meals.length ? '' : 'I could not recognise that food offline. Try naming each item, like "2 roti, dal".' };
+  }
+
+  async function addMeal() {
+    const box = $('mealText'), text = box.value.trim();
+    if (!text) { toast('Write what you ate first, for example "2 rotis and dal".'); return; }
+    $('mealAdd').disabled = true;
+    let r = await ai('meal', text, { slot: mealSlot, today: dayKey() });
+    if (!Array.isArray(r.meals)) r = demoMeal(text);
+    $('mealAdd').disabled = false;
+    const meals = (r.meals || []).filter((m) => m && m.item).map((m) => ({ item: String(m.item).slice(0, 60), kcal_low: Math.max(0, Math.round(+m.kcal_low || 0)), kcal_high: Math.max(0, Math.round(+m.kcal_high || 0)) }));
+    if (!meals.length) { toast(r.reply || 'I could not find any food in that. Try naming each item.'); return; }
+    S.logs.push({ date: dayKey(), at: Date.now(), kind: 'meal', slot: mealSlot, text, parsed: { log: { meals, symptoms: [] }, reply: r.reply || '' } });
+    box.value = ''; autoGrow(box); save(); renderToday();
+    toast(`Added to ${mealSlot.toLowerCase()}: about ${r50(meals.reduce((a, m) => a + m.kcal_low, 0))}–${r50(meals.reduce((a, m) => a + m.kcal_high, 0))} kcal.`);
+  }
+
+  function removeMeal(li, mi) {
+    const l = S.logs[li]; if (!l?.parsed?.log?.meals) return;
+    l.parsed.log.meals.splice(mi, 1);
+    if (l.kind === 'meal' && !l.parsed.log.meals.length) S.logs.splice(li, 1);
+    save(); renderToday();
   }
 
   function renderToday() {
@@ -323,26 +397,18 @@
     $('foodCard').hidden = !calGoal;
     if (calGoal) {
       const meals = logsFor(dayKey()).flatMap((l) => l.parsed?.log?.meals || []);
-      $('foodTotal').innerHTML = T.food ? `<b>${Math.round(T.kLow / 50) * 50}–${Math.round(T.kHigh / 50) * 50}</b> kcal so far, approx.` : 'Nothing logged yet today. Tell the coach what you ate.';
+      $('foodTotal').innerHTML = T.food ? `<b>${Math.round(T.kLow / 50) * 50}–${Math.round(T.kHigh / 50) * 50}</b> kcal so far, approx.` : 'Nothing logged yet today.';
       $('mealsToday').innerHTML = meals.map((m) => `<li><span>${esc(m.item)}</span><b>${m.kcal_low}–${m.kcal_high}</b></li>`).join('');
     }
     const tt = $('tab-today');
     if (calFocus) tt.insertBefore($('foodCard'), document.querySelector('.rings-card')); else tt.insertBefore($('foodCard'), $('nextCard'));
     $('nextCard').hidden = !hasRun();
     $('runPlan').hidden = !hasRun();
-    $('foodWeek').hidden = !calGoal;
-    const tp = $('tab-plan');
-    if (calFocus || !hasRun()) tp.insertBefore($('foodWeek'), $('runPlan')); else tp.appendChild($('foodWeek'));
-    if (calGoal) {
-      let cb = ''; const cv = [];
-      for (let i = 6; i >= 0; i--) { const k = dayKey(addDays(new Date(), -i)); const D = dayTotals(k); cv.push([k, D.food ? Math.round((D.kLow + D.kHigh) / 2) : 0]); }
-      const cmax = Math.max(1000, ...cv.map((v) => v[1]));
-      for (const [k, v] of cv) cb += `<div class="wb ${k === dayKey() ? 'today' : ''}"><span>${v ? (v / 1000).toFixed(1) + 'k' : ''}</span><i style="height:${(v / cmax) * 70}%"></i>${new Date(k).toLocaleDateString('en-IN', { weekday: 'narrow' })}</div>`;
-      $('calbars').innerHTML = cb;
-    }
+
+    renderFood(T);
 
     // Coach card: the latest thing the coach said today
-    const todays = logsFor(dayKey());
+    const todays = logsFor(dayKey()).filter((l) => l.kind !== 'meal');
     const last = todays[todays.length - 1];
     if (last) { $('coachMsg').textContent = last.parsed?.reply || ''; $('coachTime').textContent = 'replying to your check-in'; }
     else if (S.morning?.date === dayKey()) { $('coachMsg').textContent = S.morning.message; $('coachTime').textContent = 'today'; }
@@ -583,6 +649,10 @@
     if (pick) { const id = pick.dataset.goal; const switched = id !== S.goal; activate(id); renderToday(); setTab('today'); if (switched && isRun(id)) morning(true); }
   });
   $('addGoal').addEventListener('click', openSetup);
+  $('mealAdd').addEventListener('click', addMeal);
+  $('mealText').addEventListener('input', (e) => autoGrow(e.target));
+  $('segMeal').addEventListener('click', (e) => { const b = e.target.closest('[data-v]'); if (b) { mealSlot = b.dataset.v; document.querySelectorAll('#segMeal button').forEach((x) => x.setAttribute('aria-checked', String(x.dataset.v === mealSlot))); } });
+  $('mealGroups').addEventListener('click', (e) => { const b = e.target.closest('[data-rm]'); if (!b) return; const [li, mi] = b.dataset.rm.split(':').map(Number); removeMeal(li, mi); });
   $('goalSwitch').addEventListener('click', renderGoals);
   $('ciSend').addEventListener('click', checkin);
   $('ciText').addEventListener('input', (e) => autoGrow(e.target));

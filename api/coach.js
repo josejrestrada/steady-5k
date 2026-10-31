@@ -50,6 +50,12 @@ Output ONLY valid JSON matching the requested shape.`;
 
 function prompt(mode, text, ctx) {
   const c = JSON.stringify(ctx || {});
+  if (mode === 'meal') {
+    return `He is logging food for his calorie tracker (${(ctx && ctx.slot) || 'a meal'}): """${text}"""
+Split it into separate items. For each, estimate calories for a typical Indian home portion as a range (kcal_low, kcal_high). Use counts he gives ("2 rotis"); if he gives no amount, assume one normal portion and widen the range. Name each item briefly with its amount, e.g. "2 rotis", "dal (1 bowl)".
+Do not invent foods he did not mention. If there is no food in the message, return an empty list and ask what he ate in the reply.
+Return JSON: {"meals": [{"item": string, "kcal_low": number, "kcal_high": number}], "reply": string (one short sentence; no lecture, no targets)}`;
+  }
   if (mode === 'goals') {
     return `He is writing his goal(s) for the app in his own words: """${text}"""
 Context: ${c}
@@ -103,7 +109,7 @@ module.exports = async (req, res) => {
   let body = req.body;
   if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
   const { mode, text = '', context = {} } = body || {};
-  if (!['onboard', 'goals', 'checkin', 'morning'].includes(mode)) return res.status(400).json({ error: 'bad mode' });
+  if (!['onboard', 'goals', 'meal', 'checkin', 'morning'].includes(mode)) return res.status(400).json({ error: 'bad mode' });
   if (typeof text !== 'string' || text.length > 1500) return res.status(400).json({ error: 'text too long' });
 
   const payload = {

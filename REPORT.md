@@ -132,7 +132,7 @@ Every screen shows a "not medical advice" notice, and only made-up data is used.
 | N05 | Offline demo mode | Build now | If the AI call fails (D08), the app still logs and shows the plan, with a clear banner. |
 | N06 | Strava import | Later | He already records runs in Strava; importing them would save him retyping distance and time. |
 | N07 | Full session guide | Build now | Every run comes with a step-by-step warm-up, the main run with a pace cue ("you can speak in short sentences"), a cool-down with stretches, and tips (Ramadan timing, when to stop). Rizwan is two months into running and struggles with stamina and back pain; a bare "run 3 min, walk 1.5 min" assumes he knows how to warm up. It is folded away so the daily screen stays short (H4). |
-| N08 | Calorie-tracking goal | Build now (after the user test) | Rizwan asked to "monitor my calorie intake" alongside running (Q5). Awareness only: rough ranges per meal, a daily total and a 7-day chart, with no target, deficit or diet (F04 stays Never). |
+| N08 | Calorie tracker (Food tab) | Build now (after the user test) | Rizwan asked to "monitor my calorie intake" alongside running (Q5). He adds food any time by typing or voice, grouped by meal; the AI estimates each item as a range; check-in meals appear too; a 7-day chart shows patterns. Awareness only: no target, deficit or diet (F04 stays Never). |
 
 That is 9 of 18 class features built in some form, most of them reshaped, plus 7 new ones. Choosing one customer removed the reason for most of the rest.
 
@@ -149,7 +149,7 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 7
 | <img src="docs/screenshots/1-setup.png" width="230"> | <img src="docs/screenshots/2-today.png" width="230"> | <img src="docs/screenshots/3-checkin.png" width="230"> |
 | **4. Plan tab: finish line and full session** | **5. Ramadan mode switches on by itself** | **6. Red flag pauses training** |
 | <img src="docs/screenshots/4-full-session.png" width="230"> | <img src="docs/screenshots/5-ramadan.png" width="230"> | <img src="docs/screenshots/6-red-flag.png" width="230"> |
-| **7. After the test: goals read from his words, level by taps** | **8. Goals saved, editable, all kept going** | **9. Calorie goal in focus: food first, no target** |
+| **7. After the test: goals read from his words, level by taps** | **8. Goals saved, editable, all kept going** | **9. Food tab: calorie tracker, ranges, no target** |
 | <img src="docs/screenshots/7-goals-level.png" width="230"> | <img src="docs/screenshots/8-goal-list.png" width="230"> | <img src="docs/screenshots/9-food.png" width="230"> |
 
 **My three hardest calls:**
@@ -175,7 +175,7 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 7
 
 1. The first screen now asks **"What's your goal?"**, in his own words. The AI turns his sentence into goals and politely declines anything it cannot help with ("lose 10 kg" was declined in testing).
 2. The starting-level question comes after the goal, says why it is asked ("so your running plan starts at the right level"), and is answered with taps.
-3. A **calorie-tracking goal**: rough ranges per meal and a 7-day chart, with no target or diet (N08).
+3. A **calorie tracker**: a Food tab where he adds what he ate by meal, typed or spoken; the AI estimates each item as a range. No target or diet (N08).
 4. Goals are **saved, editable and all keep going**; he picks the one to focus on.
 
 The second point overturned a call from Q2 and Q4: he ranked calories last in the interview, but once tracking cost him nothing, he wanted it. The new version has not yet been re-tested with him.

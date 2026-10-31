@@ -108,7 +108,7 @@
           <h3 class="sec-title">Food today</h3>
           <p class="food-total" id="foodTotal"></p>
           <ul class="meals" id="mealsToday"></ul>
-          <p class="small">Rough ranges from what you tell the coach. No targets, no diet.</p>
+          <button class="btn-link left" data-go="food">Add food</button>
         </section>
 
         <section class="card next" id="nextCard">
@@ -125,11 +125,6 @@
       <!-- PLAN -->
       <main id="tab-plan" class="panel" hidden>
         <h1 class="day-title" id="planTitle">Plan</h1>
-        <section class="card" id="foodWeek" hidden>
-          <h3 class="sec-title">Calories, last 7 days</h3>
-          <div class="weekbars" id="calbars"></div>
-          <p class="small">Each bar is the middle of that day's estimated range. Use it to spot patterns, like low-fuel days before a run.</p>
-        </section>
         <div id="runPlan">
         <section class="track-panel" aria-label="Your progress to 5K">
           <div class="track-head">
@@ -162,6 +157,34 @@
         <div class="spacer"></div>
       </main>
 
+      <!-- FOOD: calorie tracker (rough ranges, no targets) -->
+      <main id="tab-food" class="panel" hidden>
+        <h1 class="day-title">Food</h1>
+        <section class="card">
+          <h3 class="sec-title">Add what you ate</h3>
+          <div class="seg seg-sm" id="segMeal" role="radiogroup" aria-label="Which meal">
+            <button data-v="Breakfast">Breakfast</button><button data-v="Lunch">Lunch</button><button data-v="Snacks">Snacks</button><button data-v="Dinner">Dinner</button>
+          </div>
+          <div class="composer">
+            <textarea id="mealText" rows="2" placeholder="e.g. 2 rotis, dal and bhindi"></textarea>
+            <button class="mic" data-target="mealText" aria-label="Speak instead"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+            <button id="mealAdd" class="send" aria-label="Add this food"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+          </div>
+        </section>
+        <section class="card">
+          <h3 class="sec-title">Today</h3>
+          <p class="food-total" id="foodDayTotal"></p>
+          <div id="mealGroups"></div>
+          <p class="small" id="fuelNote"></p>
+          <p class="small">Rough estimates from what you describe, shown as ranges. No targets, no diet.</p>
+        </section>
+        <section class="card">
+          <h3 class="sec-title">Calories, last 7 days</h3>
+          <div class="weekbars" id="calbars"></div>
+          <p class="small">Each bar is the middle of that day's estimated range. Useful for spotting low-fuel days before a run.</p>
+        </section>
+      </main>
+
       <!-- WEEK -->
       <main id="tab-week" class="panel" hidden>
         <h1 class="day-title">Week</h1>
@@ -187,6 +210,7 @@
         <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/></svg>Today</button>
         <button data-tab="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V6M4 6h12l-2.5 3.5L16 13H4"/></svg>Plan</button>
         <button data-tab="coach"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg>Coach</button>
+        <button data-tab="food"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M16 21V3c-2 1.5-3 4-3 7h3"/></svg>Food</button>
         <button data-tab="week"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-6M10 20V9M15 20v-8M20 20V5"/></svg>Week</button>
       </nav>
     </div>

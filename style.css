@@ -195,7 +195,7 @@ h1 { font-size: 46px; font-weight: 800; font-style: italic; margin: 14px 0 12px;
 .dock { position: fixed; left: 0; right: 0; bottom: calc(64px + env(safe-area-inset-bottom)); padding: 10px 16px; background: linear-gradient(to top, var(--bg) 70%, transparent); z-index: 7; }
 .dock .composer { max-width: 488px; margin: 0 auto; }
 .spacer { height: 70px; }
-.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; display: grid; grid-template-columns: repeat(4, 1fr); max-width: 520px; margin: 0 auto; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: rgba(10,18,34,.94); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 8; display: grid; grid-template-columns: repeat(5, 1fr); max-width: 520px; margin: 0 auto; padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); background: rgba(10,18,34,.94); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
 .tabbar button { border: 0; background: transparent; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; font-size: 12px; font-weight: 600; border-radius: 12px; }
 .tabbar svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .tabbar button[aria-current] { color: var(--bib); }
@@ -253,3 +253,15 @@ h1 { font-size: 46px; font-weight: 800; font-style: italic; margin: 14px 0 12px;
 .meals li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; color: var(--ink-2); }
 .meals li b { font-weight: 700; color: var(--ink); white-space: nowrap; }
 .composer-lg textarea { min-height: 84px; }
+
+/* ---------- Food tab ---------- */
+.seg-sm { margin-bottom: 12px; }
+.seg-sm button { padding: 8px 12px; font-size: 14px; }
+.meal-group { margin-top: 10px; }
+.mg-h { display: flex; justify-content: space-between; align-items: baseline; }
+.mg-h b { font-family: var(--display); font-size: 19px; font-weight: 700; }
+.mg-h span { font-size: 14px; color: var(--muted); font-weight: 600; }
+.meals li { align-items: center; }
+.meals li span { flex: 1; }
+.rm { border: 0; background: transparent; color: var(--muted); font-size: 22px; line-height: 1; width: 32px; height: 32px; border-radius: 8px; flex: none; }
+.rm:hover { color: var(--flag); background: var(--flag-bg); }
