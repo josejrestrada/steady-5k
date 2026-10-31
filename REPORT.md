@@ -12,9 +12,9 @@
 
 **My three most important reasons, ranked:**
 
-1. **Logging is a daily chore, so people stop doing it.** Respondent A quit HealthifyMe after a week: "too much effort to log, it wasn't accurate, forgot about it in the end." Respondent B tried food logging for two weeks: "very hectic and boring." Cordeiro et al. found effort is the main barrier to food journaling, and home-cooked food is about half as easy to log as packaged food (around 3 against 6.5 on a 7-point scale), which matters in India, where most meals are home-cooked. Kidman et al. list "tedious data entry" among the causes of abandonment. Respondent A's one fix: "remove the boring work like manual logging"; Respondent B wants voice notes.
+1. **Logging is a daily chore, so people stop doing it.** Respondent A quit HealthifyMe after a week: "too much effort to log… forgot about it in the end." Respondent B found food logging "very hectic and boring." Cordeiro et al. found effort is the main barrier to food journaling, and home-cooked food is about half as easy to log as packaged food (around 3 against 6.5 on a 7-point scale), which matters in India, where most meals are home-cooked. Kidman et al. list "tedious data entry" among the causes of abandonment. Respondent A's one fix: "remove the boring work like manual logging"; Respondent B wants voice notes.
 
-2. **The app tracks the past instead of pointing at the person's own goal, so progress feels invisible and they get bored.** Rizwan on Strava: "It focuses heavily on leaderboards and personal records rather than my future targets or anything truly personalized." Respondent B dropped apps that "weren't that effective" and "got bored early", but finished the one with a clear target and an end date: "Six Pack in 30 Days was effective and reached goal." HealthifyMe reviewers call plans generic (#34, #39, #43); Kidman et al. name lack of personalisation. My reading: "boring" is the symptom; the cause is a tracker with no plan forward.
+2. **The app tracks the past instead of pointing at the person's own goal, so progress feels invisible and they get bored.** Rizwan on Strava: "It focuses heavily on leaderboards and personal records rather than my future targets or anything truly personalized." Respondent B got bored of most apps but finished the one with a clear target and an end date: "Six Pack in 30 Days was effective and reached goal." HealthifyMe reviewers call plans generic (#34, #39, #43); Kidman et al. name lack of personalisation. My reading: "boring" is the symptom; the cause is a tracker with no plan forward.
 
 3. **Paywalls and billing traps destroy trust.** About 21 of the 45 reviews are about money: Strava's "way too much stuff now behind a paywall" (#12), charges after cancelling (#20), an accidental yearly subscription on MyFitnessPal (#26), and HealthifyMe refunds that never came (#30–#36). Respondent B's moment of quitting: "When they ask for premium, got bored, ads." Yet Rizwan would pay ₹500 a month "if the app offered genuinely personalized diet guidance and structured training plans" (B: at most ₹100; A: never). People object less to price than to paying before the app proves it is personal, and to surprise charges.
 
@@ -49,9 +49,9 @@ My customer is **Rizwan, 22, a college student who started running two months ag
 
 **How this choice follows from Q1:**
 
-- **Reason 2 (no goal, so boredom):** Rizwan already has a concrete goal with a finish line, the same thing that kept Respondent B on *Six Pack in 30 Days*. The app's job is to turn that goal into a plan he can see moving.
-- **Reason 1 (logging is a chore):** Rizwan has never logged food, so I can design for him without forms from day one. He already asked for voice.
-- **Reason 3 (paywalls destroy trust):** he is one of the few people in my research who would pay, and only for real personalisation. That is the bar the app has to clear.
+- **Reason 2 (no goal, so boredom):** Rizwan already has a concrete goal with a finish line, like the one that kept Respondent B going.
+- **Reason 1 (logging is a chore):** he has never logged food, so the app can avoid forms from day one; he asked for voice.
+- **Reason 3 (paywalls destroy trust):** he would pay, but only for real personalisation. That is the bar.
 - Generic apps fail hardest when life changes (Kidman et al. list "evolving needs" as a reason people leave). Ramadan is a predictable, month-long change that no app Rizwan uses accounts for.
 
 Choosing Rizwan also removes class concerns D01–D03 (no target user, too many features), D05 (he runs with his phone) and D09 (no celebrity avatars).
@@ -70,7 +70,7 @@ A form-based app would give Rizwan six input screens and a fixed plan; Q1 says t
 **What it does on its own, without being asked:**
 
 - **Speaks first.** When Rizwan opens the app, today's message is already written: the session and one nudge (Q4, hardest call 2).
-- **Reschedules the plan.** If he misses runs, it rebuilds the remaining weeks and, if needed, moves the 5K date, without guilt-tripping (F09, catch-up planning).
+- **Reschedules the plan** after missed runs, moving the finish date without guilt-tripping (F09).
 - **Switches to Ramadan mode** when he mentions roza, sehri or iftar: runs move to after iftar, water to between iftar and sehri. He can switch it back.
 
 **What it must never do:**
@@ -103,6 +103,7 @@ Every screen shows a "not medical advice" notice, and only made-up data is used.
 | 13 | Meal ideas: goal 2,600 kcal, about 525 eaten, ran today, snacks and dinner left | Balanced Indian ideas that roughly fit what is left; recovery food | Paneer bhurji with roti (350–500) and chicken dalia khichdi with sabzi (550–750); "simple recovery meals". **But together about 1,000 kcal under what was left on a run day.** | Partly |
 | 14 | Meal ideas: goal 2,200 kcal, already about 2,500 eaten, dinner left | No skipping; a light, balanced dinner; no guilt | Two rotis, dal and bhindi (300–450): "One day over your target is totally fine, Rizwan!" | Yes |
 | 15 | "I want to change my goal from 1.7km to 2km" (my own test) | Explain; never raise difficulty on its own | **First version: a flat refusal** ("We can stick to your current plan… Let's crush step 3"), confusing because "step" also meant walking steps. Now: asks about pain, offers Level 4 with what it means, moves up only after he confirms. | **No, then yes** after fix |
+| 16 | "yes", replying to "Did you manage to get your Level 1 run in today?" (Rizwan's third test) | Read it as yes to the question; log the planned session | **First version: asked the same question four times.** After the fix: "Brilliant job on Level 1, Rizwan! How did your legs feel?", session logged, plan moves on. | **No, then yes** after fix |
 
 **What the tests taught me.** Safety held every time. The real weakness was the opposite of what I feared: the AI was **too cautious**, holding Rizwan on a step he had beaten (tests 1, 2) and under-fuelling him in meal ideas (test 13). Explaining that walk breaks are part of the plan fixed the first; test 13, a reply that contradicts the plan (7) and missing fasting water advice (8) remain open. Deployment also failed once: Google had retired the Gemini 2.5 models, so the app fell back to demo mode.
 
@@ -187,6 +188,8 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 1
 Separately, and as my own call from his Q2 answer rather than from the test, I added an optional calorie goal he sets himself, with meal ideas (F04), and a water glass (N09).
 
 **Second test, same evening.** He did not know how to log his steps, and could not find "Tell the coach about your day" after scrolling. I pinned that button above the tab bar on Today, labelled "Run, steps, food, water, sleep", and made an empty Steps tile open the coach with "Steps today:" already typed.
+
+**Third test.** His screenshot showed the coach asking "Did you manage to get your run in today?" four times while he kept answering "yes": the AI saw each message alone. It now receives the day's conversation, never repeats a question, logs a confirmed session, and offers "Yes, the full session / Part of it / No run today" buttons (test 16).
 
 The second point overturned a call from Q2 and Q4: he ranked calories last in the interview, but once tracking cost him nothing, he wanted it.
 
