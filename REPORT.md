@@ -16,7 +16,7 @@
 
 2. **The app tracks the past instead of pointing at the person's own goal, so progress feels invisible and they get bored.** Rizwan on Strava: "It focuses heavily on leaderboards and personal records rather than my future targets or anything truly personalized." Respondent B dropped apps that "weren't that effective" and "got bored early", but finished the one with a clear target and an end date: "Six Pack in 30 Days was effective and reached goal." HealthifyMe reviewers say plans were generic or would not adapt to their life (#34, #39, #43), and Kidman et al. name lack of personalisation and low perceived effectiveness. My reading: "boring" is the symptom; the cause is a tracker with no plan forward.
 
-3. **Paywalls and billing traps destroy trust.** About 21 of the 45 reviews are about money: Strava has "way too much stuff now behind a paywall" (#12) and charged a user "when I cancelled" (#20); a MyFitnessPal user "accidentally purchased the yearly subscription" (#26); most HealthifyMe complaints are refunds that never came (#30–#36). Respondent B's moment of quitting: "When they ask for premium, got bored, ads." Yet willingness to pay varies: A would never pay, B would pay at most ₹100 a month, and Rizwan would pay ₹500 a month "if the app offered genuinely personalized diet guidance and structured training plans." People do not object to price as such; they object to paying before the app has proved it is personal, and to surprise charges.
+3. **Paywalls and billing traps destroy trust.** About 21 of the 45 reviews are about money: Strava's "way too much stuff now behind a paywall" (#12), charges after cancelling (#20), an accidental yearly subscription on MyFitnessPal (#26), and HealthifyMe refunds that never came (#30–#36). Respondent B's moment of quitting: "When they ask for premium, got bored, ads." Yet Rizwan would pay ₹500 a month "if the app offered genuinely personalized diet guidance and structured training plans" (B: at most ₹100; A: never). People object less to price than to paying before the app proves it is personal, and to surprise charges.
 
 **The class guesses, tested**
 
@@ -39,7 +39,7 @@ My customer is **Rizwan, 22, a college student who started running two months ag
 - **Ramadan:** he is Muslim and fasts every Ramadan. He avoids running while fasting ("thirst, without a doubt" is the hardest part) but still plays football and badminton tournaments while fasting. He ranks fasting first among the things he wants help with.
 - **What he has tried:** Strava, for pace, time and distance. He has not tried any food, water or sleep app.
 - **Why it has not worked:** Strava tells him what he did, not what to do next. "It focuses heavily on leaderboards and personal records rather than my future targets or anything truly personalized." It has no plan to get him to 5K, nothing for his back pain, and nothing for the month a year when his whole routine changes.
-- **How he wants to be helped:** by typing or voice ("sometimes I feel too tired or lazy to type"), and he wants the app to "message me first to remind me and keep me on track". He would pay about ₹500 a month for "genuinely personalized diet guidance and structured training plans".
+- **How he wants to be helped:** by typing or voice ("sometimes I feel too tired or lazy to type"), with the app to "message me first". He would pay about ₹500 a month for real personalisation.
 
 **Customers I considered and rejected, and why:**
 
@@ -62,10 +62,10 @@ A form-based app would give Rizwan six input screens and a fixed plan; Q1 says t
 
 **What the AI decides:**
 
-- **What the message means.** It extracts run distance and time, walk breaks, water, sleep, meals and symptoms. Calories from home food are shown as a range with "approx.", never as an exact number.
-- **Tomorrow's session.** It decides whether to move up a step, repeat the step or ease off, based on how today went (completed the run? pain? poor sleep? fasting? little water?).
-- **What matters most today.** It picks the one nudge worth giving (usually water, Rizwan's biggest issue when fasting) rather than reporting everything.
-- **When to ask instead of guess.** If something important is missing or vague ("had biryani"), it asks one short question.
+- **What the message means:** run distance and time, walk breaks, steps, water, sleep, meals and symptoms. Calories are a range, never an exact number.
+- **The next session:** move up, repeat, ease off or rest, based on how today went (pain, sleep, fasting, water).
+- **What matters most today:** one nudge (usually water), not a report.
+- **When to ask instead of guess:** one short question if the message is too vague.
 
 **What it does on its own, without being asked:**
 
@@ -101,7 +101,7 @@ Every screen shows a "not medical advice" notice, and only made-up data is used.
 | 11 | "ok" | Ask one question; log nothing | Logged nothing; asked "how did today's run go?" | Yes |
 | 12 | "3 slices of pizza and a coke, no run today, 9k steps, slept 8 hours" | Rest day; 9,000 steps, not 9 km; ranges; no lecture | Logged 9,000 steps, 8 h sleep, pizza 600–900 and coke 130–160 kcal, no run. "Good job getting those 9k steps in." | Yes |
 
-**What the tests taught me.** Safety held on every try: no medicine named, the red flag stopped training, and it refused crash dieting. The real weakness was the opposite of what I feared: the AI was **too cautious** and kept Rizwan on the same step after he had beaten it (tests 1 and 2). That would have recreated Q1 reason 2, a plan that never moves. I fixed it by telling the AI that walk breaks are part of the plan, and both tests then passed. Two smaller problems remain: the reply can contradict the plan decision (test 7), and it forgets fasting-specific water advice when answering a question (test 8). One failure came from deployment, not the prompts: Google had retired the Gemini 2.5 models for new keys, so the first live version could not answer at all and fell back to demo mode, which is why the demo mode exists. Replies take 2–10 seconds.
+**What the tests taught me.** Safety held every time. The real weakness was the opposite of what I feared: the AI was **too cautious**, keeping Rizwan on the same step after he had beaten it (tests 1, 2), which would recreate Q1 reason 2, a plan that never moves. Telling the AI that walk breaks are part of the plan fixed both. Still open: the reply can contradict the plan decision (test 7), and it forgets fasting-aware water advice when answering a question (test 8). One failure came from deployment: Google had retired the Gemini 2.5 models, so the first live version could not answer and fell back to demo mode. Replies take 2–10 seconds.
 
 ## Q4. What I will build, and what I will leave out
 
@@ -137,9 +137,9 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 6
 
 **The core experience**
 
-*First two minutes.* Rizwan opens the link and sees one question: "How's your running right now?" He types or says something like "I can run about 1.5 km before I need to walk, 3 days a week, evenings." The AI places him on step 4 of 13 (run 3 minutes, walk 1.5 minutes, five times), works out a finish-line date for 5K non-stop, and the coach confirms where he starts. He sees his finish line, his next run and an empty "today so far". No sign-up, no profile form.
+*First two minutes.* Rizwan opens the link and sees one question: "How's your running right now?" He types or says "I can run about 1.5 km before I need to walk, 3 days a week." In the live test the AI placed him on step 3 of 13 (run 2 minutes, walk 1.5 minutes, six times), set a finish line of mid-December for 5K non-stop, and confirmed where he starts. No sign-up, no form.
 
-*A normal day.* When he opens the app the coach has already written today's message, for example: "Today: 4-minute runs. Two bottles of water before 6 pm." In the evening he sends one check-in, typed or spoken: "ran 2.5k, walked twice, 7k steps, 3 bottles water, slept 1 to 7, rice and fish curry for lunch." The app fills in run, steps, water, sleep and an approximate calorie range, replies in two lines, and moves the plan up, holds it, or eases off. If he reports back pain, tomorrow gets easier; if he reports chest tightness, training pauses.
+*A normal day.* The coach's message is waiting when he opens the app; "See the full session" gives the warm-up, run and cool-down. In the evening he sends one check-in, typed or spoken: "ran 2.5k, walked twice, 7k steps, 3 bottles water, slept 1 to 7, rice and fish curry for lunch." The app fills in run, steps, water, sleep and an approximate calorie range, replies in two lines, and moves the plan up, holds it, or eases off. If he reports back pain, tomorrow gets easier; if he reports chest tightness, training pauses.
 
 *Screenshots.* Screen 2 was captured from the live app at steady-5k.vercel.app. The others are rendered from the same deployed code, replaying the replies the live AI gave on 31 October.
 
@@ -151,8 +151,8 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 6
 
 **My three hardest calls:**
 
-1. **Pushing calories into the background.** Calorie counting from photos (F01) and a diet plan (F04) were the class's headline features, and Respondent A asked for photo logging. But Rizwan ranked calories last, his goal is running rather than weight, and Q1 shows food logging is the chore that makes people quit. I chose rough calorie ranges from words, with no targets. *What would change my mind:* if Rizwan or other runners ask for food guidance after using it (he said he would pay for "personalized diet guidance"), I would add it, reviewed by a dietitian.
-2. **"Message me first" in a browser.** Rizwan and Respondent B both asked for this. Real phone notifications need an installed app or a home-screen web app with permissions, and the brief requires no install. I chose a coach message that is already written when he opens the app, and said so honestly in Q3. *What would change my mind:* if testing shows he forgets to open the app for days, opt-in web push or WhatsApp reminders become worth the extra setup.
+1. **Pushing calories into the background.** Photo calories (F01) and a diet plan (F04) were the class's headline features, and Respondent A asked for photo logging. But Rizwan ranked calories last, his goal is running, not weight, and Q1 shows food logging is the chore that makes people quit. I chose rough calorie ranges from words, with no targets. *What would change my mind:* if Rizwan or other runners ask for food guidance after using it (he said he would pay for "personalized diet guidance"), I would add it, reviewed by a dietitian.
+2. **"Message me first" in a browser.** Rizwan and Respondent B both asked for this. Real phone notifications need an installed app, and the brief requires no install. I chose a coach message already written when he opens the app. *What would change my mind:* if testing shows he forgets to open the app for days, opt-in web push or WhatsApp reminders become worth the extra setup.
 3. **How much control the AI gets over the plan.** A fixed plan is predictable but is exactly the one-size-fits-all approach that bores people (Q1, reason 2). A plan the AI rewrites freely is personal but could push a new runner too hard. I chose a middle path: the AI decides whether to move up, repeat, ease off or rest, and the code enforces the limits (a fixed 13-step ladder, two good sessions before moving up, at most one change a day, never moving up with pain, and a red-flag pause the AI cannot override). *What would change my mind:* if the Q3 tests show the AI is consistently sensible, it could adjust session lengths too; if it is erratic, I would narrow it further.
 
 ## Q5. User test
