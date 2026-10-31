@@ -560,7 +560,10 @@
     });
   });
 
-  function autoGrow(t) { t.style.height = 'auto'; t.style.height = Math.min(140, t.scrollHeight) + 'px'; }
+  function autoGrow(t) {
+    if (!t.value || !t.offsetParent) { t.style.height = ''; return; } // empty or hidden: use the box's natural size so the example shows
+    t.style.height = 'auto'; t.style.height = Math.min(160, Math.max(t.scrollHeight, 24)) + 'px';
+  }
 
   // ---------- Wire up ----------
   $('onGo').addEventListener('click', readGoals);

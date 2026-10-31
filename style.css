@@ -252,3 +252,4 @@ h1 { font-size: 46px; font-weight: 800; font-style: italic; margin: 14px 0 12px;
 .meals { list-style: none; margin: 0 0 8px; padding: 0; }
 .meals li { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 15px; color: var(--ink-2); }
 .meals li b { font-weight: 700; color: var(--ink); white-space: nowrap; }
+.composer-lg textarea { min-height: 84px; }
