@@ -98,16 +98,12 @@
           <ul class="legend" id="legend"></ul>
         </section>
         <section class="water-card" aria-label="Water today">
-          <div class="glass" id="glass" aria-hidden="true"><div class="glass-fill" id="glassFill"></div><div class="glass-marks" id="glassMarks"></div></div>
-          <div class="water-info">
+          <div class="water-top">
             <h3 class="sec-title">Water</h3>
             <p class="water-amt"><b id="waterAmt">0</b> <span id="waterGoal">/ 3 L</span></p>
-            <p class="small" id="waterHint">One tap adds a glass (250 ml).</p>
-            <div class="water-btns">
-              <button id="waterMinus" class="wbtn" aria-label="Remove a glass">−</button>
-              <button id="waterPlus" class="wbtn plus">+ Glass</button>
-            </div>
           </div>
+          <div class="glasses" id="glasses" role="group" aria-label="Glasses of water, 250 ml each"></div>
+          <p class="small" id="waterHint">Tap a glass when you drink one (250 ml).</p>
         </section>
         <div class="mini-stats" id="miniStats"></div>
 

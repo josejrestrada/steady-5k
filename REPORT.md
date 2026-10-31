@@ -135,7 +135,7 @@ Every screen shows a "not medical advice" notice, and only made-up data is used.
 | N06 | Strava import | Later | He already records runs in Strava; importing them would save him retyping distance and time. |
 | N07 | Full session guide | Build now | Every run comes with a step-by-step warm-up, the main run with a pace cue ("you can speak in short sentences"), a cool-down with stretches, and tips (Ramadan timing, when to stop). Rizwan is two months into running and struggles with stamina and back pain; a bare "run 3 min, walk 1.5 min" assumes he knows how to warm up. It is folded away so the daily screen stays short (H4). |
 | N08 | Calorie tracker (Food tab) | Build now (after the user test) | Rizwan asked to "monitor my calorie intake" (Q5). He adds food by typing or voice, grouped by meal; the AI estimates each item as a range; check-in meals appear too; a 7-day chart shows patterns. Shown only if he has the calorie goal. |
-| N09 | Water glass | Build now | Thirst is his hardest problem when fasting. A glass on Today fills in 250 ml steps towards 3 L (2.5 L between iftar and sehri); one tap adds a glass. |
+| N09 | Water glasses | Build now | Thirst is his hardest problem when fasting. Today shows 12 small glasses of 250 ml (3 L; 10 between iftar and sehri in Ramadan); one tap fills a glass. |
 
 That is 9 of 18 class features built in some form, most of them reshaped, plus 8 new ones. Choosing one customer removed the reason for most of the rest.
 
