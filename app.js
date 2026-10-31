@@ -164,7 +164,7 @@
     return {
       today: dayKey(), time: new Date().toTimeString().slice(0, 5),
       goals: Object.keys(S.goals || {}).map(labelOf), own_calorie_goal: S.calGoal || null, goal_in_focus: S.goal ? labelOf(S.goal) : '', running_goal: hasRun() ? GOAL.title : 'none', plan_ladder: STEPS.slice(1).map((_, i) => `${i + 1} ${stepText(i + 1)}`).join('; '),
-      next_session: S.nextRest ? 'Rest day' : stepText(S.step), plan_step: `${S.step}/${LAST}`, sessions_done_at_step: `${S.atStep}/${SESSIONS_PER_STEP}`,
+      next_session: S.nextRest ? 'Rest day' : sessionLine(S.step), plan_step: `${S.step}/${LAST}`, sessions_done_at_step: `${S.atStep}/${SESSIONS_PER_STEP}`,
       ramadan_mode: S.ramadan, days_since_last_run: daysSinceRun(), runs_per_week: S.runsPerWeek,
       paused_for_red_flag: !!S.redFlag, recent_checkins: recent,
     };
@@ -230,17 +230,26 @@
       ]) + cool;
     }
     const s = STEPS[n];
-    const main = s.nonstop
+    const v = mode === 'run' ? variant(n) : null;
+    const main = v && v.runs ? [
+          `Pyramid: run ${v.runs.join(', ')} minutes, walking ${s.walk} min between each.`,
+          'The middle runs are the longest. Keep them easy; the total running time is the same as usual.',
+          'Walk briskly in the walk breaks, don\'t stop and stand.',
+          `Today's focus: ${v.cue.toLowerCase()}.`,
+        ]
+      : s.nonstop
       ? [
           s.final ? `Run ${s.nonstop} at one steady, easy pace. Start slower than you think you need to.` : `Run ${s.nonstop} without stopping, at an easy pace.`,
           'Easy pace = you can still speak in short sentences. If you can only gasp single words, slow down.',
           'If you really must walk, walk 1 minute and then carry on. It still counts.',
+          ...(v ? [`${v.name}: ${v.note.charAt(0).toLowerCase() + v.note.slice(1)}`, `Today's focus: ${v.cue.toLowerCase()}.`] : []),
         ]
       : [
           `Run ${s.run} min, then walk ${s.walk} min. Repeat ${s.reps} times.`,
           'Run at an easy pace: you should be able to speak in short sentences.',
           'Walk briskly in the walk breaks, don\'t stop and stand.',
           'Finish the last run strong but not sprinting.',
+          ...(v ? [`${v.name}: ${v.note.charAt(0).toLowerCase() + v.note.slice(1)}`] : []),
         ];
     const tips = [
       S.ramadan ? 'Ramadan: run 1–2 hours after iftar, once you have had water and a light meal. Never run while fasting.' : 'Drink a glass of water 30–60 minutes before, and take a bottle with you if it is hot.',
@@ -251,10 +260,47 @@
     return warm + block('Main run', `${sessionMinutes(n)} min`, main) + cool + `<div class="blk tips"><b>Tips</b><ul>${li(tips)}</ul></div>`;
   }
 
+  // ---------- Session variety: same difficulty, different feel ----------
+  // The step (total running time) only changes through the plan rules; the style rotates after every run.
+  const CUES = ['Short, quick steps', 'Relaxed shoulders and loose hands', 'Breathe out a little longer than you breathe in',
+    'Swing your arms forward and back, not across your body', 'Look ahead, not at your feet', 'Finish the last minute gently, no sprint'];
+  const runsDone = () => S.logs.filter((l) => l.parsed?.log && (l.parsed.log.run_km != null || l.parsed.log.run_min != null)).length;
+  const half = (x) => Math.max(0.5, Math.round(x * 2) / 2);
+  function variant(n) {
+    const st = STEPS[n], k = runsDone(), cue = CUES[k % CUES.length];
+    if (st.nonstop) {
+      const v = [
+        { key: 'steady', name: 'Steady run', note: 'One even pace from start to finish.' },
+        { key: 'talk', name: 'Talk-test run', note: 'Easy enough to speak in full sentences the whole way.' },
+        { key: 'route', name: 'New route', note: 'Same run, somewhere different: a park loop or a new street.' },
+      ][k % 3];
+      return { ...v, cue };
+    }
+    const styles = st.reps > 2 ? ['classic', 'pyramid', 'focus', 'route'] : ['classic', 'focus', 'route'];
+    const key = styles[k % styles.length];
+    if (key === 'pyramid') {
+      const up = Array.from({ length: Math.ceil(st.reps / 2) }, (_, i) => i + 1);
+      const pat = [...up, ...up.slice(0, Math.floor(st.reps / 2)).reverse()];
+      const sum = pat.reduce((a, b) => a + b, 0), total = st.run * st.reps;
+      return { key, name: 'Pyramid', runs: pat.map((p) => half((p * total) / sum)), note: `Build up, then come back down. Walk ${st.walk} min between runs.`, cue };
+    }
+    if (key === 'focus') return { key, name: 'Focus run', note: `Same intervals. Today, practise one thing: ${cue.toLowerCase()}.`, cue };
+    if (key === 'route') return { key, name: 'New route', note: 'Same intervals, somewhere different: a park loop or a new street.', cue };
+    return { key, name: 'Classic intervals', note: 'Run, walk, repeat. Keep the runs easy.', cue };
+  }
+  const mm = (m) => `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, '0')}`;
+  function sessionLine(n) {
+    const v = variant(n), st = STEPS[n];
+    if (v.runs) return `${v.name}: run ${v.runs.join(', ')} min, walking ${st.walk} min between`;
+    return `${v.name}: ${stepText(n)}`;
+  }
+
   function stepHTML(n) {
     const st = STEPS[n];
     const fmt = (m) => `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, '0')}`;
+    const v = variant(n);
     if (st.nonstop) return `<span class="sw"><b>${st.nonstop}</b><small>without stopping</small></span>`;
+    if (v.runs) return `<span class="sw seq"><b>${v.runs.map((r) => (r % 1 ? r.toFixed(1) : r)).join('–')}</b><small>minutes running, walk ${fmt(st.walk)} between</small></span>`;
     return `<span class="sw"><b>${fmt(st.run)}</b><small>run</small></span><span class="sw walk"><b>${fmt(st.walk)}</b><small>walk</small></span><span class="sw reps"><b>×${st.reps}</b><small>rounds</small></span>`;
   }
 
@@ -471,7 +517,7 @@
       { label: 'Run', color: 'var(--c-run)', frac: resting ? (T.run ? 1 : 0) : T.run_km / runGoal, text: resting ? (T.run ? `${+T.run_km.toFixed(1)} km` : hasRun() ? 'Rest day' : 'No run logged') : `${+T.run_km.toFixed(1)} / ${runGoal} km` },
       ...(calGoal0 ? [S.calGoal
         ? { label: 'Calories', color: 'var(--c-cal)', frac: ((T.kLow + T.kHigh) / 2) / S.calGoal, text: T.food ? `~${Math.round((T.kLow + T.kHigh) / 100) * 50} / ${S.calGoal.toLocaleString('en-IN')}` : `0 / ${S.calGoal.toLocaleString('en-IN')}` }
-        : { label: 'Calories, meals logged', color: 'var(--c-cal)', frac: slotsLogged / 4, text: T.food ? `${r50(T.kLow)}–${r50(T.kHigh)}` : 'None yet' }] : []),
+        : { label: 'Calories', color: 'var(--c-cal)', frac: slotsLogged / 4, text: T.food ? `${r50(T.kLow)}–${r50(T.kHigh)}` : 'None yet' }] : []),
       { label: 'Sleep', color: 'var(--c-sleep)', frac: (T.sleep_h || 0) / sleepGoal, text: `${T.sleep_h ?? 0} / ${sleepGoal} h` },
     ];
     // Water glass: fills in 250 ml glasses towards 3 L (2.5 L between iftar and sehri in Ramadan)
@@ -516,7 +562,7 @@
     const total = (n) => sessionMinutes(n) + 16;
     if (S.redFlag) { $('nextLabel').textContent = 'Paused'; $('nextSession').innerHTML = '<span class="sw-text">No running until you feel OK</span>'; $('nextHint').textContent = 'See a doctor about the warning sign you mentioned.'; }
     else if (S.nextRest) { $('nextLabel').textContent = 'Next session'; $('nextSession').innerHTML = '<span class="sw-text">Rest day. An easy walk if you like.</span>'; $('nextHint').textContent = `Then: ${stepText(S.step)}`; }
-    else { $('nextLabel').textContent = 'Next run'; $('nextSession').innerHTML = stepHTML(S.step); $('nextHint').textContent = `About ${total(S.step)} min with warm-up and cool-down${S.ramadan ? ', after iftar' : ''}.`; }
+    else { const v = variant(S.step); $('nextLabel').textContent = `Next run: ${v.name}`; $('nextSession').innerHTML = stepHTML(S.step); $('nextHint').textContent = `${v.note} About ${total(S.step)} min with warm-up and cool-down${S.ramadan ? ', after iftar' : ''}.`; }
 
     // PLAN tab
     const pct = Math.round(((S.step - 1) + S.atStep / SESSIONS_PER_STEP) / (LAST - 1) * 100);
@@ -530,7 +576,7 @@
     $('finishDate').textContent = S.done ? GOAL.short : fmtDate(targetDate());
     $('finishNote').textContent = S.done ? (S.runGoal === '5k' ? 'Next goal: 10K. Add it from your goals.' : 'Keep running for fun, and pick a new goal when you like.') : '';
     $('finishNote').hidden = !S.done;
-    $('planLabel').textContent = S.redFlag ? 'Paused' : S.nextRest ? 'Rest day' : `Next run: ${stepText(S.step)}`;
+    $('planLabel').textContent = S.redFlag ? 'Paused' : S.nextRest ? 'Rest day' : `Next run: ${variant(S.step).name}`;
     $('nextPlan').innerHTML = S.redFlag ? '<p class="small">No session until you have seen a doctor about the warning sign, or you feel completely fine.</p>'
       : sessionPlan(S.step, S.nextRest ? 'rest' : 'run');
     $('ladder').innerHTML = STEPS.slice(1).map((_, i) => { const n = i + 1; return `<li class="${n < S.step ? 'done' : n === S.step ? 'now' : ''}"><span class="n">${n}</span><span>${stepText(n)}</span>${n === S.step ? '<em>You are here</em>' : ''}</li>`; }).join('');

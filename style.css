@@ -307,3 +307,5 @@ h1 { font-size: 46px; font-weight: 800; font-style: italic; margin: 14px 0 12px;
 #tab-today { padding-bottom: 170px; }
 .mini-add { text-align: left; border: 1.5px dashed var(--line); cursor: pointer; color: var(--ink); }
 .mini-add b { color: var(--c-run); }
+
+.sw.seq b { font-size: 38px; letter-spacing: .01em; }

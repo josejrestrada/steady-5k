@@ -136,8 +136,9 @@ Every screen shows a "not medical advice" notice, and only made-up data is used.
 | N07 | Full session guide | Build now | Every run comes with a step-by-step warm-up, the main run with a pace cue ("you can speak in short sentences"), a cool-down with stretches, and tips (Ramadan timing, when to stop). Rizwan is two months into running and struggles with stamina and back pain; a bare "run 3 min, walk 1.5 min" assumes he knows how to warm up. It is folded away so the daily screen stays short (H4). |
 | N08 | Calorie tracker (Food tab) | Build now (after the user test) | Rizwan asked to "monitor my calorie intake" (Q5). He adds food by typing or voice, grouped by meal; the AI estimates each item as a range; check-in meals appear too; a 7-day chart shows patterns. Shown only if he has the calorie goal. |
 | N09 | Water glass | Build now | Thirst is his hardest problem when fasting. A glass on Today fills in 250 ml steps towards 3 L (2.5 L between iftar and sehri); one tap adds a glass. |
+| N10 | Session variety | Build now | Repeating the same session is the boredom Q1 (reason 2) warns about, but raising the load daily risks injury for a new runner with back pain. So the difficulty only changes by the plan rules, while the style rotates after each run: classic, pyramid, focus run (one technique cue) and new route, with the same total running time. |
 
-That is 9 of 18 class features built in some form, most of them reshaped, plus 8 new ones. Choosing one customer removed the reason for most of the rest.
+That is 9 of 18 class features built in some form, most of them reshaped, plus 9 new ones. Choosing one customer removed the reason for most of the rest.
 
 **The core experience**
 
