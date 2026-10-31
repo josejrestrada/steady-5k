@@ -12,7 +12,7 @@
 
 **My three most important reasons, ranked:**
 
-1. **Logging is a daily chore, so people stop doing it.** Respondent A quit HealthifyMe after a week: "too much effort to log… forgot about it in the end." Respondent B found food logging "very hectic and boring." Cordeiro et al. found effort is the main barrier to food journaling, and home-cooked food is about half as easy to log as packaged food (around 3 against 6.5 on a 7-point scale), which matters in India, where most meals are home-cooked. Kidman et al. list "tedious data entry" among the causes of abandonment. Respondent A's one fix: "remove the boring work like manual logging"; Respondent B wants voice notes.
+1. **Logging is a daily chore, so people stop doing it.** Respondent A quit HealthifyMe after a week: "too much effort to log… forgot about it in the end." Respondent B found food logging "very hectic and boring." Cordeiro et al. found effort is the main barrier to food journaling: food that comes without a label, like a plate at a party or a meal a friend cooked, was rated about 3 out of 7 for ease of logging, against 6.5 for packaged food. Most of Rizwan's home meals have no label either. Kidman et al. list "tedious data entry" among the causes of abandonment. Respondent A's one fix: "remove the boring work like manual logging"; Respondent B wants voice notes.
 
 2. **The app tracks the past instead of pointing at the person's own goal, so progress feels invisible and they get bored.** Rizwan on Strava: "It focuses heavily on leaderboards and personal records rather than my future targets or anything truly personalized." Respondent B got bored of most apps but finished the one with a clear target and an end date: "Six Pack in 30 Days was effective and reached goal." HealthifyMe reviewers call plans generic (#34, #39, #43); Kidman et al. name lack of personalisation. My reading: "boring" is the symptom; the cause is a tracker with no plan forward.
 
@@ -35,7 +35,7 @@ My customer is **Rizwan, 22, a college student who started running two months ag
 
 - **What he wants to get done:** "be able to run a full 5K at a single, steady pace without stopping to walk", then 10K. He wants to become a runner, not to lose weight.
 - **What gets in his way:** stamina, and back pain.
-- **His routine:** brunch at college, other meals at home, two or three meals out a week. Home-cooked food is exactly what calorie apps handle worst (Q1, reason 1).
+- **His routine:** brunch at college, other meals at home, two or three meals out a week. Unlabelled home food is exactly what calorie apps handle worst (Q1, reason 1).
 - **Ramadan:** he is Muslim and fasts every Ramadan. He avoids running while fasting ("thirst, without a doubt" is the hardest part) but still plays football and badminton tournaments while fasting. He ranks fasting first among the things he wants help with.
 - **What he has tried:** Strava only, for pace, time and distance.
 - **Why it has not worked:** Strava tells him what he did, not what to do next. "It focuses heavily on leaderboards and personal records rather than my future targets or anything truly personalized." It has no plan to get him to 5K, nothing for his back pain, and nothing for the month a year when his whole routine changes.
@@ -45,7 +45,7 @@ My customer is **Rizwan, 22, a college student who started running two months ag
 
 1. **Adults over 60 (the class's second group).** More likely to have medical conditions, which raises the stakes for an app that must not diagnose, and pulls in emergency and guardian features (F15–F17). None of my interviewees was in this group, so I would be designing on guesses.
 2. **The casual tracker, like Respondent A.** They quit HealthifyMe in a week and said "rn I don't really care, I eat whatever I want." No design fixes absent motivation, and they would not pay.
-3. **The serial app-switcher, like Respondent B.** They have tried eight apps, mainly for workout goals, want vegetarian diet help, and would pay at most ₹100 a month. Free apps already serve them, and their goals change every few weeks.
+3. **The serial app-switcher, like Respondent B.** They have tried eight apps, mainly for workout goals, want vegetarian diet help, and would pay at most ₹100 a month. Free apps already serve them.
 
 **How this choice follows from Q1:**
 
@@ -196,7 +196,7 @@ The second point overturned a call from Q2 and Q4: he ranked calories last in th
 ## References
 
 1. Kidman, P. G., Curtis, R. G., Watson, A., & Maher, C. A. (2024). When and why adults abandon lifestyle behavior and mental health mobile apps: Scoping review. *Journal of Medical Internet Research, 26*, e56897. https://doi.org/10.2196/56897
-2. Cordeiro, F., Epstein, D. A., Thomaz, E., Bales, E., Jagannathan, A. K., Abowd, G. D., & Fogarty, J. (2015). Barriers and negative nudges: Exploring challenges in food journaling. *Proceedings of the 33rd Annual ACM Conference on Human Factors in Computing Systems (CHI '15)*. https://doi.org/10.1145/2702123.2702155. Figures taken from the University of Washington News summary: https://washington.edu/news/?p=36478 (16 April 2015).
+2. Cordeiro, F., Epstein, D. A., Thomaz, E., Bales, E., Jagannathan, A. K., Abowd, G. D., & Fogarty, J. (2015). Barriers and negative nudges: Exploring challenges in food journaling. *Proceedings of the 33rd Annual ACM Conference on Human Factors in Computing Systems (CHI '15)*. https://doi.org/10.1145/2702123.2702155. Figures checked against the paper (survey of 141 current and lapsed food loggers; 5,526 forum posts).
 3. Trustpilot. (2025–2026). *Strava reviews*, page 5. https://www.trustpilot.com/review/strava.com?page=5 (accessed 30 October 2026)
 4. Trustpilot. (2025–2026). *MyFitnessPal reviews*. https://www.trustpilot.com/review/www.myfitnesspal.com (accessed 30 October 2026)
 5. Trustpilot. (2026). *HealthifyMe reviews*. https://nl-be.trustpilot.com/review/www.healthifyme.com (accessed 30 October 2026)
