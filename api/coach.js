@@ -4,8 +4,10 @@
 // Tried in order. Thinking is switched off where the model allows it, so replies come back in a few seconds.
 const MODELS = [
   ...(process.env.GEMINI_MODEL ? [{ id: process.env.GEMINI_MODEL, thinking: null }] : []),
-  { id: 'gemini-2.5-flash', thinking: { thinkingBudget: 0 } },
-  { id: 'gemini-2.5-flash-lite', thinking: { thinkingBudget: 0 } },
+  { id: 'gemini-3.5-flash-lite', thinking: { thinkingLevel: 'minimal' } },
+  { id: 'gemini-3.5-flash-lite', thinking: null },
+  { id: 'gemini-3.8-flash', thinking: { thinkingLevel: 'low' } },
+  { id: 'gemini-3.8-flash', thinking: null },
   { id: 'gemini-flash-latest', thinking: null },
 ];
 
