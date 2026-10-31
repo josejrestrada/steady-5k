@@ -1,6 +1,6 @@
 # Report: Steady 5K
 
-**Jose Ramil Jr. D. Estrada · Roll No. [roll number]**
+**Jose Ramil Jr. D. Estrada · Roll No. PGDMAI-25-18**
 
 ## Q1. Why do health apps fail?
 
@@ -151,7 +151,7 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 6
 
 ## Q5. User test
 
-**The app:** [Steady 5K](LIVE_LINK), deployed on Vercel. The page is plain HTML, CSS and JavaScript; one serverless function (`api/coach.js`) calls Google Gemini with a key stored in Vercel's environment variables, never in the repository. If the AI fails, a labelled demo mode keeps the app usable.
+**The app:** [Steady 5K](https://steady-5k.vercel.app), deployed on Vercel. The page is plain HTML, CSS and JavaScript; one serverless function (`api/coach.js`) calls Google Gemini with a key stored in Vercel's environment variables, never in the repository. If the AI fails, a labelled demo mode keeps the app usable.
 
 **Who tested it, what they did, what confused them, and what I changed:**
 
@@ -175,7 +175,7 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 6
 2. I have not submitted this work, in whole or in part, for assessment in any other course.
 3. I have used generative AI tools only as permitted by the project brief, and I have disclosed that use below.
 
-**Name:** Jose Ramil Jr. D. Estrada · **Roll No.:** [roll number] · **Date:** 31 October 2026
+**Name:** Jose Ramil Jr. D. Estrada · **Roll No.:** PGDMAI-25-18 · **Date:** 31 October 2026
 
 **AI-use disclosure**
 

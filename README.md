@@ -1,10 +1,10 @@
 # Steady 5K
 
-**Jose Ramil Jr. D. Estrada** · Roll No. **[roll number]** · MAI-594 Introduction to Vibe Coding · AY 2026–27
+**Jose Ramil Jr. D. Estrada** · Roll No. **PGDMAI-25-18** · MAI-594 Introduction to Vibe Coding · AY 2026–27
 
 > **A running coach for Rizwan, a 22-year-old new runner, that gets him to 5K without stopping: he tells it about his day in one message (typed or spoken, English or Hinglish), and it logs everything, adjusts his plan and speaks first each day, including during Ramadan.**
 
-- **Live app:** [https://…]
+- **Live app:** [https://steady-5k.vercel.app](https://steady-5k.vercel.app)
 - **Report:** [REPORT.md](REPORT.md)
 
 Not medical advice. The app does not diagnose or prescribe. Prototype: use made-up data only.
