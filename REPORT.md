@@ -141,7 +141,13 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 6
 
 *A normal day.* When he opens the app the coach has already written today's message, for example: "Today: 4-minute runs. Two bottles of water before 6 pm." In the evening he sends one check-in, typed or spoken: "ran 2.5k, walked twice, 7k steps, 3 bottles water, slept 1 to 7, rice and fish curry for lunch." The app fills in run, steps, water, sleep and an approximate calorie range, replies in two lines, and moves the plan up, holds it, or eases off. If he reports back pain, tomorrow gets easier; if he reports chest tightness, training pauses.
 
-*Screenshots:* [to be added from the live app: setup, today screen, check-in reply, Ramadan mode, red-flag pause]
+*Screenshots.* Screen 2 was captured from the live app at steady-5k.vercel.app. The others are rendered from the same deployed code, replaying the replies the live AI gave on 31 October.
+
+| 1. Setup: one question, no form | 2. Live: plan and finish line after setup | 3. Evening check-in, logged and answered |
+|---|---|---|
+| <img src="docs/screenshots/1-setup.png" width="230"> | <img src="docs/screenshots/2-today.jpg" width="230"> | <img src="docs/screenshots/3-checkin.png" width="230"> |
+| **4. Full session guide** | **5. Ramadan mode switches on by itself** | **6. Red flag pauses training** |
+| <img src="docs/screenshots/4-full-session.png" width="230"> | <img src="docs/screenshots/5-ramadan.png" width="230"> | <img src="docs/screenshots/6-red-flag.png" width="230"> |
 
 **My three hardest calls:**
 
