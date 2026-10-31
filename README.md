@@ -11,14 +11,15 @@ Not medical advice. The app does not diagnose or prescribe. Prototype: use made-
 
 ## How it works
 
-- `index.html`, `style.css`, `app.js`: the app (plain HTML/CSS/JavaScript, no build step). Data is stored only in the browser (localStorage).
-- `api/coach.js`: a Vercel serverless function that calls Google Gemini. The API key is read from the `GEMINI_API_KEY` environment variable on Vercel and is **never** committed.
+- Next.js (App Router). `app/page.js` is the page, `app/globals.css` the styles and `lib/steady.js` the app logic. Data is stored only in the browser (localStorage).
+- `app/api/coach/route.js`: a server route that calls Google Gemini. The API key is read from the `GEMINI_API_KEY` environment variable on Vercel and is **never** committed.
+- Run locally with `npm install` then `npm run dev`.
 - If the AI is unreachable, the app switches to a labelled demo mode with basic rule-based replies.
 - A red-flag check in `app.js` (chest pain, fainting, dizziness, etc.) pauses training even if the AI misses it.
 
 ## Credits
 
-- Google Gemini API (AI model), called from a Vercel serverless function.
+- Google Gemini API (AI model), called from a Next.js server route.
 - Manrope font by Mikhail Sharanda, via Google Fonts (SIL Open Font License).
-- No third-party code libraries. The run/walk plan ladder was written for this project.
+- Built with Next.js and React. The run/walk plan ladder was written for this project.
 - Built with Claude (Anthropic) as the AI coding assistant; see the AI-use disclosure in the report.

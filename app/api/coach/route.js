@@ -1,4 +1,4 @@
-// Serverless function (Vercel). Calls Google Gemini and returns structured JSON.
+// Next.js route handler (POST /api/coach). Calls Google Gemini and returns structured JSON.
 // The API key lives ONLY in the host's environment variable GEMINI_API_KEY. Never commit it.
 
 const MODELS = [process.env.GEMINI_MODEL || 'gemini-flash-latest', 'gemini-2.5-flash'];
@@ -32,7 +32,7 @@ RULES (never break these):
 4. Mild soreness or back discomfort that is not a red flag: plan_action "down" or "rest", and suggest a doctor or physio if it keeps happening.
 5. Never encourage skipping meals, crash dieting, extreme calorie targets, running while fasting in the heat, or extra/double sessions to catch up. Never comment on his body or weight.
 6. Calories: estimate typical Indian home portions as a range (kcal_low, kcal_high). If portion size is unknown, use a wide range. Never claim precision.
-7. Never invent numbers he did not give: use null. 1 bottle = 1 litre and 1 glass = 0.25 litre unless he says otherwise.
+7. Never invent numbers he did not give: use null. 1 bottle = 1 litre and 1 glass = 0.25 litre unless he says otherwise. Steps come from his phone, e.g. "7k steps" = 7000; never treat steps as km.
 8. If a check-in is too vague to log (e.g. "ok", "hi"), set needs_question=true and ask exactly one short question.
 9. Never sell, link or recommend products or brands.
 10. If he asks a question, answer it within these rules and log only what he actually reported.
@@ -73,16 +73,19 @@ async function callGemini(model, key, body) {
   } finally { clearTimeout(t); }
 }
 
-module.exports = async (req, res) => {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return res.status(503).json({ error: 'no_key' });
+export const maxDuration = 30;
 
-  let body = req.body;
-  if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
+const json = (body, status = 200) => Response.json(body, { status });
+
+export async function POST(req) {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return json({ error: 'no_key' }, 503);
+
+  let body;
+  try { body = await req.json(); } catch { body = {}; }
   const { mode, text = '', context = {} } = body || {};
-  if (!['onboard', 'checkin', 'morning'].includes(mode)) return res.status(400).json({ error: 'bad mode' });
-  if (typeof text !== 'string' || text.length > 1500) return res.status(400).json({ error: 'text too long' });
+  if (!['onboard', 'checkin', 'morning'].includes(mode)) return json({ error: 'bad mode' }, 400);
+  if (typeof text !== 'string' || text.length > 1500) return json({ error: 'text too long' }, 400);
 
   const payload = {
     systemInstruction: { parts: [{ text: SYSTEM }] },
@@ -98,14 +101,14 @@ module.exports = async (req, res) => {
       lastErr = `${model}: ${r.status} ${(await r.text()).slice(0, 200)}`;
       if (r.status !== 404) break; // only fall back to the next model if this one does not exist
     }
-    if (!r.ok) return res.status(502).json({ error: 'ai_error', detail: lastErr });
+    if (!r.ok) return json({ error: 'ai_error', detail: lastErr }, 502);
     const data = await r.json();
     const raw = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
     const clean = raw.replace(/^```(json)?/i, '').replace(/```$/, '').trim();
     let out;
-    try { out = JSON.parse(clean); } catch { return res.status(502).json({ error: 'bad_json', raw: raw.slice(0, 300) }); }
-    return res.status(200).json(out);
+    try { out = JSON.parse(clean); } catch { return json({ error: 'bad_json', raw: raw.slice(0, 300) }, 502); }
+    return json(out);
   } catch (e) {
-    return res.status(502).json({ error: 'ai_unreachable', detail: String(e).slice(0, 200) });
+    return json({ error: 'ai_unreachable', detail: String(e).slice(0, 200) }, 502);
   }
-};
+}

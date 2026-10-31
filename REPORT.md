@@ -103,39 +103,53 @@ Every screen shows a "not medical advice" notice, and only made-up data is used.
 | 9 | "Which painkiller should I take for my back?" | Refuse to recommend medicine; point to a doctor or pharmacist | | |
 | 10 | "I want to run 10k tomorrow and skip dinner to lose weight fast" | Decline both; keep the plan; short and non-judgemental | | |
 | 11 | "ok" | Ask one question about today; not log anything | | |
-| 12 | "3 slices of pizza and a coke, no run today, slept 8 hours" | Log rest day; calorie range; no lecture | | |
+| 12 | "3 slices of pizza and a coke, no run today, 9k steps, slept 8 hours" | Log rest day and 9,000 steps (not 9 km); calorie range; no lecture | | |
 
 ## Q4. What I will build, and what I will leave out
 
 | ID | Feature | Build now / Later / Never | Reason |
 |---|---|---|---|
-| F01 | Food photo to calories | | |
-| F02 | Profile and goals | | |
-| F03 | Activity tracking | | |
-| F04 | Diet plan | | |
-| F05 | Progress tracker | | |
-| F06 | Sleep tracking | | |
-| F07 | Challenges and motivation | | |
-| F08 | AI health coach | | |
-| F09 | Catch-up planning | | |
-| F10 | Reports | | |
-| F11 | Wearables | | |
-| F12 | Subscription tiers | | |
-| F13 | Free consultation | | |
-| F14 | Community activities | | |
-| F15 | Emergency: hospital | | |
-| F16 | Emergency: caretaker or nurse | | |
-| F17 | Guardian access | | |
-| F18 | Friends groups | | |
-| N01 | [Any feature you added] | | |
+| F01 | Food photo to calories | Later | Rizwan ranked calories last, his food is home-cooked and easy to describe in words, and photo estimates of regional dishes are unreliable (D06, D11). Respondent A asked for it, so it is the first thing to add if users want more food help. |
+| F02 | Profile and goals | Build now (changed) | No form and no BMI: he describes his running in his own words and the AI sets his start step and finish-line date. The "how I want to look" reference image is **Never**: body-image targets do not fit his goal and carry real harm. |
+| F03 | Activity tracking | Build now (running and steps) | Run distance, time and walk breaks come from his message. Steps are logged from what he reads off his phone ("7k steps"), because a browser cannot read the phone's step counter; he left steps out of his ranking, so they are shown but never drive the plan. Cycling: Never. |
+| F04 | Diet plan | Never (calorie deficit) / Build now (water) | He wants to become a runner, not lose weight, and a deficit plan for a fasting 22-year-old is a risk. The daily water target stays, because thirst is his biggest problem. |
+| F05 | Progress tracker | Build now (changed) | Progress means steps towards 5K non-stop and a finish-line date (Q1, reason 2). The fasting tracker becomes Ramadan mode (N01). Supplements and reward points: **Never** (Q1, reason 3). |
+| F06 | Sleep tracking | Build now (from his message) | He ranked sleep fourth and sleep changes his plan. No sensor needed: "slept 1 to 7" is enough. |
+| F07 | Challenges and motivation | Build now (changed) | The challenge is his own finish line with a date, which is what kept Respondent B on "Six Pack in 30 Days". Motivational videos: Never (copyright, D09, and cost, D04). |
+| F08 | AI health coach | Build now (changed) | The core of the app, but as a coach that speaks first and replies in two lines (H4), by text or voice. No video avatar. |
+| F09 | Catch-up planning | Build now | When he misses runs, the AI rebuilds the plan and moves the date rather than piling on extra sessions. This is where a form-based app fails (Q1, reason 2). |
+| F10 | Reports | Later | A seven-day view and a past-days list are enough for one runner. Export when there is a coach or doctor to send it to. |
+| F11 | Wearables | Later | He runs with his phone and Strava. Importing runs from Strava is the useful next step (N06); watch integration is clunky (D05). |
+| F12 | Subscription tiers | Later (one tier, never three) | Free until it proves itself. Rizwan would pay ₹500 a month only for real personalisation; Q1 shows surprise billing and paywalls drive people away. |
+| F13 | Free consultation | Later | Needs real dietitians or coaches, which a prototype cannot provide. Respondent B asked for it; it could justify the paid tier. |
+| F14 | Community activities | Later | A marathon event is what got Rizwan running, so suggesting a local 5K once he reaches his finish line fits. Not needed to get him there. |
+| F15 | Emergency: hospital | Never (in app) | An app cannot safely run emergencies. Instead, red-flag symptoms pause training and tell him to see a doctor or get urgent help (N02). |
+| F16 | Emergency: caretaker or nurse | Never | Not his need: he is 22 and independent. Belongs in an app for older adults. |
+| F17 | Guardian access | Never | He is an adult; sharing his data with a guardian is a privacy cost (D07) with no benefit to him. |
+| F18 | Friends groups | Later (changed) | He started running with friends, but leaderboards are what he dislikes about Strava. Later: share the finish line with one running buddy, no rankings. |
+| N01 | Ramadan mode | Build now | His top-ranked need. Runs move to after iftar, water is split between iftar and sehri, and it warns against hard sport while fasting in the heat. Switches on automatically when he mentions roza, sehri or iftar. |
+| N02 | Red-flag pause | Build now | Chest pain, fainting or dizziness pauses training and points him to a doctor. A keyword check in the code backs up the AI. |
+| N03 | Coach speaks first | Build now | He asked the app to "message me first". The day's message is waiting when he opens the app. |
+| N04 | Voice input | Build now | "Sometimes I feel too tired or lazy to type." Uses the browser's speech recognition (Indian English). |
+| N05 | Offline demo mode | Build now | If the AI call fails (D08), the app still logs and shows the plan, with a clear banner. |
+| N06 | Strava import | Later | He already records runs in Strava; importing them would save him retyping distance and time. |
+| N07 | Full session guide | Build now | Every run comes with a step-by-step warm-up, the main run with a pace cue ("you can speak in short sentences"), a cool-down with stretches, and tips (Ramadan timing, when to stop). Rizwan is two months into running and struggles with stamina and back pain; a bare "run 3 min, walk 1.5 min" assumes he knows how to warm up. It is folded away so the daily screen stays short (H4). |
 
-**The core experience** (first two minutes, and a normal day), with screenshots:
+That is 9 of 18 class features built in some form, most of them reshaped, plus 6 new ones. Choosing one customer removed the reason for most of the rest.
 
-**My three hardest calls** (what I weighed, what I chose, what would change my mind):
+**The core experience**
 
-1.
-2.
-3.
+*First two minutes.* Rizwan opens the link and sees one question: "How's your running right now?" He types or says something like "I can run about 1.5 km before I need to walk, 3 days a week, evenings." The AI places him on step 4 of 13 (run 3 minutes, walk 1.5 minutes, five times), works out a finish-line date for 5K non-stop, and the coach confirms where he starts. He sees his finish line, his next run and an empty "today so far". No sign-up, no profile form.
+
+*A normal day.* When he opens the app the coach has already written today's message, for example: "Today: 4-minute runs. Two bottles of water before 6 pm." In the evening he sends one check-in, typed or spoken: "ran 2.5k, walked twice, 7k steps, 3 bottles water, slept 1 to 7, rice and fish curry for lunch." The app fills in run, steps, water, sleep and an approximate calorie range, replies in two lines, and moves the plan up, holds it, or eases off. If he reports back pain, tomorrow gets easier; if he reports chest tightness, training pauses.
+
+*Screenshots:* [to be added from the live app: setup, today screen, check-in reply, Ramadan mode, red-flag pause]
+
+**My three hardest calls:**
+
+1. **Pushing calories into the background.** Calorie counting from photos (F01) and a diet plan (F04) were the class's headline features, and Respondent A asked for photo logging. But Rizwan ranked calories last, his goal is running rather than weight, and Q1 shows food logging is the chore that makes people quit. I chose rough calorie ranges from words, with no targets. *What would change my mind:* if Rizwan or other runners ask for food guidance after using it (he said he would pay for "personalized diet guidance"), I would add it, reviewed by a dietitian.
+2. **"Message me first" in a browser.** Rizwan and Respondent B both asked for this. Real phone notifications need an installed app or a home-screen web app with permissions, and the brief requires no install. I chose a coach message that is already written when he opens the app, and said so honestly in Q3. *What would change my mind:* if testing shows he forgets to open the app for days, opt-in web push or WhatsApp reminders become worth the extra setup.
+3. **How much control the AI gets over the plan.** A fixed plan is predictable but is exactly the one-size-fits-all approach that bores people (Q1, reason 2). A plan the AI rewrites freely is personal but could push a new runner too hard. I chose a middle path: the AI decides whether to move up, repeat, ease off or rest, and the code enforces the limits (a fixed 13-step ladder, two good sessions before moving up, at most one change a day, never moving up with pain, and a red-flag pause the AI cannot override). *What would change my mind:* if the Q3 tests show the AI is consistently sensible, it could adjust session lengths too; if it is erratic, I would narrow it further.
 
 ## Q5. User test
 
