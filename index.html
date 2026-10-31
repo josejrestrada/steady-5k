@@ -5,17 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Steady 5K</title>
   <meta name="description" content="A running coach that gets you to 5K without stopping. One message a day, no forms.">
-  <meta name="theme-color" content="#14342b">
+  <meta name="theme-color" content="#1F4FB8">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%2314342b'/><path d='M28 62 L46 44 L56 54 L74 34' stroke='%23f2a541' stroke-width='9' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='4' y='4' width='92' height='92' rx='22' fill='%231F4FB8'/><path d='M22 66 H78 M22 50 H78 M22 34 H78' stroke='%23ffffff' stroke-width='5' opacity='.55'/><path d='M66 20 V80' stroke='%23FFC93C' stroke-width='9' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
 </head>
 <body>
   <div class="app">
     <header class="topbar">
-      <div class="brand"><span class="logo" aria-hidden="true"></span>Steady&nbsp;5K</div>
+      <div class="brand"><span class="logo" aria-hidden="true"></span><span>Steady <b>5K</b></span></div>
       <div class="top-actions">
         <button id="ramadanBtn" class="pill" hidden aria-pressed="false" title="Ramadan mode">🌙 Ramadan</button>
         <button id="menuBtn" class="icon-btn" aria-label="Menu">⋯</button>
@@ -32,7 +32,7 @@
     <!-- ONBOARDING -->
     <main id="onboard" class="view" hidden>
       <section class="hero">
-        <p class="eyebrow">Your goal</p>
+        <div class="hero-lane" aria-hidden="true"><i></i><i></i><i></i><span class="hero-tape"></span></div>
         <h1>Run 5K without stopping to walk.</h1>
         <p class="lede">No forms. Tell me where your running is today, in your own words. I'll build the plan and set your finish line.</p>
       </section>
@@ -40,7 +40,7 @@
         <label for="onText" class="label">How's your running right now?</label>
         <div class="composer composer-lg">
           <textarea id="onText" rows="4" placeholder="e.g. I started 2 months ago, I can run about 1.5 km before I need to walk. I run 3 days a week, mostly evenings."></textarea>
-          <button class="mic" data-target="onText" aria-label="Speak instead">🎤</button>
+          <button class="mic" data-target="onText" aria-label="Speak instead"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         </div>
         <button id="onGo" class="btn-primary">Build my plan</button>
         <button id="onSample" class="btn-link">Just exploring? Load a sample week</button>
@@ -51,7 +51,7 @@
     <!-- TODAY -->
     <main id="today" class="view" hidden>
       <section class="coach-card" aria-live="polite">
-        <div class="coach-head"><span class="coach-dot"></span>Coach <span id="coachTime" class="muted"></span></div>
+        <div class="coach-head"><span class="coach-dot" aria-hidden="true"></span>Coach <span id="coachTime"></span></div>
         <p id="coachMsg" class="coach-msg">…</p>
       </section>
 
@@ -61,34 +61,35 @@
         <button id="flagClear" class="btn-small">A doctor has checked me / I feel fine now</button>
       </section>
 
-      <section class="finish card">
-        <div class="finish-top">
-          <div>
-            <p class="eyebrow">Finish line</p>
-            <h2 id="finishDate">5K non-stop</h2>
-          </div>
-          <div class="ring" id="ring"><span id="ringText">1/13</span></div>
+      <section class="track-panel" aria-label="Your progress to 5K">
+        <div class="track-head">
+          <p class="finish-title"><span id="finishLead">5K non-stop by</span> <strong id="finishDate">—</strong></p>
+          <p id="finishNote" class="small"></p>
         </div>
-        <div class="bar"><span id="barFill"></span></div>
-        <p id="finishNote" class="muted small"></p>
+        <div class="track" id="track">
+          <div class="lane-lines" aria-hidden="true"></div>
+          <div class="marks" id="marks" aria-hidden="true"></div>
+          <div class="runner" id="runner"><span class="bib">Step</span><b id="ringText">1</b></div>
+          <div class="tape" aria-hidden="true"><span>5K</span></div>
+        </div>
       </section>
 
       <section class="card next">
-        <p class="eyebrow" id="nextLabel">Next run</p>
-        <h3 id="nextSession">—</h3>
+        <h3 class="sec-title" id="nextLabel">Next run</h3>
+        <div class="stopwatch" id="nextSession">—</div>
         <p id="nextHint" class="muted small"></p>
         <div id="nextPlan"></div>
       </section>
 
-      <section class="card">
-        <p class="eyebrow">Today so far</p>
+      <section class="card today-card">
+        <h3 class="sec-title">Today</h3>
         <div class="chips" id="chips"></div>
       </section>
 
       <section class="thread" id="thread"></section>
 
       <section class="week card">
-        <p class="eyebrow">Last 7 days · km run</p>
+        <h3 class="sec-title">Kilometres, last 7 days</h3>
         <div class="weekbars" id="weekbars"></div>
       </section>
 
@@ -106,8 +107,8 @@
     <footer id="dock" class="dock" hidden>
       <div class="composer">
         <textarea id="ciText" rows="1" placeholder="How did today go? Run, steps, food, water, sleep — just say it."></textarea>
-        <button class="mic" data-target="ciText" aria-label="Speak instead">🎤</button>
-        <button id="ciSend" class="send" aria-label="Send">➤</button>
+        <button class="mic" data-target="ciText" aria-label="Speak instead"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button id="ciSend" class="send" aria-label="Send check-in"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 12h13M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
     </footer>
 

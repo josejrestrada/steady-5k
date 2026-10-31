@@ -218,6 +218,13 @@
     return warm + block('Main run', `${sessionMinutes(n)} min`, main) + cool + `<div class="blk tips"><b>Tips</b><ul>${li(tips)}</ul></div>`;
   }
 
+  function stepHTML(n) {
+    const st = STEPS[n];
+    const fmt = (m) => `${Math.floor(m)}:${String(Math.round((m % 1) * 60)).padStart(2, '0')}`;
+    if (st.nonstop) return `<span class="sw"><b>${n === LAST ? '5 km' : st.nonstop}</b><small>without stopping</small></span>`;
+    return `<span class="sw"><b>${fmt(st.run)}</b><small>run</small></span><span class="sw walk"><b>${fmt(st.walk)}</b><small>walk</small></span><span class="sw reps"><b>×${st.reps}</b><small>rounds</small></span>`;
+  }
+
   // ---------- Rendering ----------
   function show(view) {
     for (const v of ['onboard', 'today', 'history']) $(v).hidden = v !== view;
@@ -230,16 +237,18 @@
     $('ramadanBtn').setAttribute('aria-pressed', String(!!S.ramadan));
     // finish line
     const pct = Math.round(((S.step - 1) + S.atStep / SESSIONS_PER_STEP) / (LAST - 1) * 100);
-    $('ringText').textContent = `${S.step}/13`;
-    $('ring').style.setProperty('--p', pct + '%');
-    $('barFill').style.width = pct + '%';
-    $('finishDate').textContent = S.done ? 'You did it: 5K non-stop 🏁' : `5K non-stop by ${fmtDate(targetDate())}`;
-    $('finishNote').textContent = S.done ? 'Next goal: 10K. Ask the coach when you are ready.' : `Step ${S.step} of 13 · ${S.atStep}/${SESSIONS_PER_STEP} sessions done here · ${S.runsPerWeek} runs a week`;
+    $('ringText').textContent = S.step;
+    $('marks').innerHTML = Array.from({ length: LAST }, (_, i) => `<i class="${i + 1 < S.step ? 'done' : i + 1 === S.step ? 'now' : ''}" style="left:${(i / (LAST - 1)) * 100}%"></i>`).join('');
+    $('runner').style.setProperty('--x', pct + '%');
+    $('track').setAttribute('aria-label', `Step ${S.step} of 13 on the way to 5K`);
+    $('finishLead').textContent = S.done ? 'You did it:' : '5K non-stop by';
+    $('finishDate').textContent = S.done ? '5K non-stop' : fmtDate(targetDate());
+    $('finishNote').textContent = S.done ? 'Next goal: 10K. Ask the coach when you are ready.' : `Step ${S.step} of 13. ${S.atStep} of ${SESSIONS_PER_STEP} sessions done at this step, ${S.runsPerWeek} runs a week.`;
     // next session
     const total = (n) => sessionMinutes(n) + 16;
-    if (S.redFlag) { $('nextLabel').textContent = 'Paused'; $('nextSession').textContent = 'No running until you feel OK'; $('nextHint').textContent = 'See a doctor about the warning sign you mentioned.'; $('nextPlan').innerHTML = ''; }
-    else if (S.nextRest) { $('nextLabel').textContent = 'Next session'; $('nextSession').textContent = 'Rest day · easy walk if you like'; $('nextHint').textContent = `Then: ${stepText(S.step)}`; $('nextPlan').innerHTML = `<details class="plan"><summary>See the full rest-day plan</summary>${sessionPlan(S.step, 'rest')}</details>`; }
-    else { $('nextLabel').textContent = 'Next run'; $('nextSession').textContent = stepText(S.step); $('nextHint').textContent = `About ${total(S.step)} min with warm-up and cool-down${S.ramadan ? ' · after iftar' : ''}`; $('nextPlan').innerHTML = `<details class="plan" ${S.planOpen ? 'open' : ''}><summary>See the full session</summary>${sessionPlan(S.step, 'run')}</details>`; $('nextPlan').querySelector('details').addEventListener('toggle', (e) => { S.planOpen = e.target.open; save(); }); }
+    if (S.redFlag) { $('nextLabel').textContent = 'Paused'; $('nextSession').innerHTML = '<span class="sw-text">No running until you feel OK</span>'; $('nextHint').textContent = 'See a doctor about the warning sign you mentioned.'; $('nextPlan').innerHTML = ''; }
+    else if (S.nextRest) { $('nextLabel').textContent = 'Next session'; $('nextSession').innerHTML = '<span class="sw-text">Rest day. An easy walk if you like.</span>'; $('nextHint').textContent = `Then: ${stepText(S.step)}`; $('nextPlan').innerHTML = `<details class="plan"><summary>See the full rest-day plan</summary>${sessionPlan(S.step, 'rest')}</details>`; }
+    else { $('nextLabel').textContent = 'Next run'; $('nextSession').innerHTML = stepHTML(S.step); $('nextHint').textContent = `About ${total(S.step)} min with warm-up and cool-down${S.ramadan ? ', after iftar' : ''}`; $('nextPlan').innerHTML = `<details class="plan" ${S.planOpen ? 'open' : ''}><summary>See the full session</summary>${sessionPlan(S.step, 'run')}</details>`; $('nextPlan').querySelector('details').addEventListener('toggle', (e) => { S.planOpen = e.target.open; save(); }); }
     // red flag
     $('flagBanner').hidden = !S.redFlag;
     // chips
