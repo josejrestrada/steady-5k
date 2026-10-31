@@ -508,6 +508,42 @@
     S.ideas = { date: dayKey(), list: r.ideas.slice(0, 5), note: r.note || '' }; save(); renderToday();
   }
 
+  function renderWeek() {
+    const keys = Array.from({ length: 7 }, (_, i) => dayKey(addDays(new Date(), i - 6)));
+    const D = keys.map((k) => ({ k, ...dayTotals(k) }));
+    $('weekRange').textContent = `${fmtDate(keys[0])} to ${fmtDate(keys[6])}`;
+    const dayL = (k) => new Date(k).toLocaleDateString('en-IN', { weekday: 'narrow' });
+    const fmt1 = (n) => (n ? +n.toFixed(1) : 0);
+    const card = ({ title, color, vals, goal, label, stats }) => {
+      const max = Math.max(goal || 0, ...vals, 0.0001) * 1.15;
+      const bars = vals.map((v, i) => `<div class="wb ${keys[i] === dayKey() ? 'today' : ''}"><span>${v ? label(v) : ''}</span><i style="height:${(v / max) * 70}%;${v ? `background:${color}` : ''}"></i>${dayL(keys[i])}</div>`).join('');
+      const line = goal ? `<div class="goal-line" style="bottom:calc(${(goal / max) * 70}% + 23px)"><span>goal</span></div>` : '';
+      return `<section class="card week-card"><div class="wk-head"><h3 class="sec-title" style="color:${color}">${title}</h3></div>
+        <div class="wk-stats">${stats.map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join('')}</div>
+        <div class="weekbars wk-bars">${line}${bars}</div></section>`;
+    };
+    const cards = [];
+    // Run
+    const km = D.map((d) => d.run_km), runDays = D.filter((d) => d.run).length;
+    cards.push(card({ title: 'Run', color: 'var(--c-run)', vals: km, label: fmt1,
+      stats: [[`${fmt1(km.reduce((a, b) => a + b, 0))} km`, 'this week'], [`${runDays}`, `run${runDays === 1 ? '' : 's'} logged`], [`${fmt1(Math.max(...km))} km`, 'longest day']] }));
+    // Water
+    const wGoal = S.ramadan ? 2.5 : 3, w = D.map((d) => d.water_l), wLogged = w.filter(Boolean);
+    cards.push(card({ title: 'Water', color: 'var(--c-water)', vals: w, goal: wGoal, label: fmt1,
+      stats: [[wLogged.length ? `${fmt1(wLogged.reduce((a, b) => a + b, 0) / wLogged.length)} L` : '—', 'daily average'], [`${w.filter((v) => v >= wGoal).length} of 7`, `days at ${wGoal} L`]] }));
+    // Sleep
+    const sl = D.map((d) => d.sleep_h || 0), slLogged = sl.filter(Boolean);
+    cards.push(card({ title: 'Sleep', color: 'var(--c-sleep)', vals: sl, goal: 8, label: fmt1,
+      stats: [[slLogged.length ? `${fmt1(slLogged.reduce((a, b) => a + b, 0) / slLogged.length)} h` : '—', 'average night'], [`${sl.filter((v) => v >= 7).length} of 7`, 'nights of 7 h+']] }));
+    // Calories (only with the calorie goal; rough ranges, no judgement)
+    if (S.goals?.cal) {
+      const kc = D.map((d) => (d.food ? Math.round((d.kLow + d.kHigh) / 2) : 0)), kLogged = kc.filter(Boolean);
+      cards.push(card({ title: 'Calories', color: 'var(--c-cal)', vals: kc, goal: S.calGoal || 0, label: (v) => `${(v / 1000).toFixed(1)}k`,
+        stats: [[kLogged.length ? `~${r50(kLogged.reduce((a, b) => a + b, 0) / kLogged.length).toLocaleString('en-IN')}` : '—', 'kcal on logged days'], [`${kLogged.length} of 7`, 'days logged']] }));
+    }
+    $('weekCards').innerHTML = cards.join('');
+  }
+
   function renderToday() {
     show('main');
     $('ramadanBtn').setAttribute('aria-pressed', String(!!S.ramadan));
@@ -613,12 +649,8 @@
       <div class="bubble me">${esc(l.text)}</div>
       <div class="bubble ai ${l.parsed?.red_flag ? 'red' : ''}">${esc(l.parsed?.reply || '')}${l.note ? `<span class="meta">${esc(l.note)}</span>` : ''}</div>`).join('') + flowBtns;
 
-    // WEEK tab
-    let bars = ''; const vals = [];
-    for (let i = 6; i >= 0; i--) { const k = dayKey(addDays(new Date(), -i)); vals.push([k, dayTotals(k).run_km]); }
-    const max = Math.max(3, ...vals.map((v) => v[1]));
-    for (const [k, v] of vals) bars += `<div class="wb ${k === dayKey() ? 'today' : ''}"><span>${v ? +v.toFixed(1) : ''}</span><i style="height:${(v / max) * 70}%"></i>${new Date(k).toLocaleDateString('en-IN', { weekday: 'narrow' })}</div>`;
-    $('weekbars').innerHTML = bars;
+    // WEEK tab: one weekly summary per thing he tracks (run, water, sleep, and calories if that is one of his goals)
+    renderWeek();
     const days = [...new Set(S.logs.map((l) => l.date))].sort().reverse();
     $('histList').innerHTML = days.length ? days.map((k) => {
       const D = dayTotals(k);

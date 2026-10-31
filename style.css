@@ -333,3 +333,15 @@ h1 { font-size: 46px; font-weight: 800; font-style: italic; margin: 14px 0 12px;
 .steps-foot .small { margin: 0; }
 .steps-foot .btn-small { margin-top: 0; white-space: nowrap; border-color: var(--bib); color: var(--bib); }
 @media (prefers-reduced-motion: reduce) { #stProgress, #stRunner { transition: none; } }
+
+/* ---------- Week tab: one summary per tracker ---------- */
+.week-range { margin: -8px 0 6px; }
+.week-card { padding-bottom: 14px; }
+.wk-head .sec-title { margin-bottom: 6px; }
+.wk-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 8px; margin-bottom: 8px; }
+.wk-stats b { display: block; font-family: var(--display); font-size: 26px; font-weight: 800; line-height: 1.05; }
+.wk-stats span { font-size: 13px; color: var(--muted); font-weight: 600; }
+.wk-bars { position: relative; height: 130px; }
+.wk-bars .wb i { max-width: 26px; }
+.goal-line { position: absolute; left: 0; right: 0; border-top: 1.5px dashed rgba(255,255,255,.35); pointer-events: none; }
+.goal-line span { position: absolute; right: 0; top: -16px; font-size: 11px; color: var(--muted); font-weight: 700; }
