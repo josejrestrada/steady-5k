@@ -164,7 +164,7 @@
     return {
       today: dayKey(), time: new Date().toTimeString().slice(0, 5),
       goals: Object.keys(S.goals || {}).map(labelOf), own_calorie_goal: S.calGoal || null, goal_in_focus: S.goal ? labelOf(S.goal) : '', running_goal: hasRun() ? GOAL.title : 'none', plan_ladder: STEPS.slice(1).map((_, i) => `${i + 1} ${stepText(i + 1)}`).join('; '),
-      next_session: S.nextRest ? 'Rest day' : sessionLine(S.step), plan_step: `${S.step}/${LAST}`, sessions_done_at_step: `${S.atStep}/${SESSIONS_PER_STEP}`,
+      next_session: S.nextRest ? 'Rest day' : sessionLine(S.step), plan_level: `${S.step}/${LAST}`, good_runs_at_this_level: `${S.atStep}/${SESSIONS_PER_STEP}`,
       ramadan_mode: S.ramadan, days_since_last_run: daysSinceRun(), runs_per_week: S.runsPerWeek,
       paused_for_red_flag: !!S.redFlag, recent_checkins: recent,
     };
@@ -182,13 +182,13 @@
     let note = '';
     if (action === 'up') {
       S.atStep += 1;
-      if (S.atStep >= SESSIONS_PER_STEP && S.step < LAST) { S.step += 1; S.atStep = 0; S.lastChangeDay = dayKey(); note = `Moved up to step ${S.step}.`; }
+      if (S.atStep >= SESSIONS_PER_STEP && S.step < LAST) { S.step += 1; S.atStep = 0; S.lastChangeDay = dayKey(); note = `Moved up to Level ${S.step}.`; }
       else if (S.step === LAST) { note = 'Finish line reached! 🏁'; S.done = true; }
-      else note = `${S.atStep} of ${SESSIONS_PER_STEP} sessions done at this step.`;
+      else note = `${S.atStep} of ${SESSIONS_PER_STEP} good runs done at this level.`;
       S.nextRest = false;
     } else if (action === 'down') {
       if (S.step > 1) { S.step -= 1; S.lastChangeDay = dayKey(); }
-      S.atStep = 0; S.nextRest = false; note = `Eased back to step ${S.step}.`;
+      S.atStep = 0; S.nextRest = false; note = `Eased back to Level ${S.step}.`;
     } else if (action === 'rest') {
       S.nextRest = true; note = 'Next session is a rest day.';
     } else { S.nextRest = false; }
@@ -514,7 +514,7 @@
     const calGoal0 = !!S.goals?.cal;
     const slotsLogged = new Set(logsFor(dayKey()).filter((l) => l.kind === 'meal').map((l) => l.slot)).size;
     const parts = [
-      { label: 'Run', color: 'var(--c-run)', frac: resting ? (T.run ? 1 : 0) : T.run_km / runGoal, text: resting ? (T.run ? `${+T.run_km.toFixed(1)} km` : hasRun() ? 'Rest day' : 'No run logged') : `${+T.run_km.toFixed(1)} / ${runGoal} km` },
+      { label: resting ? 'Run' : 'Run, today\'s session', color: 'var(--c-run)', frac: resting ? (T.run ? 1 : 0) : T.run_km / runGoal, text: resting ? (T.run ? `${+T.run_km.toFixed(1)} km` : hasRun() ? 'Rest day' : 'No run logged') : `${+T.run_km.toFixed(1)} / ${runGoal} km` },
       ...(calGoal0 ? [S.calGoal
         ? { label: 'Calories', color: 'var(--c-cal)', frac: ((T.kLow + T.kHigh) / 2) / S.calGoal, text: T.food ? `~${Math.round((T.kLow + T.kHigh) / 100) * 50} / ${S.calGoal.toLocaleString('en-IN')}` : `0 / ${S.calGoal.toLocaleString('en-IN')}` }
         : { label: 'Calories', color: 'var(--c-cal)', frac: slotsLogged / 4, text: T.food ? `${r50(T.kLow)}–${r50(T.kHigh)}` : 'None yet' }] : []),
@@ -569,9 +569,9 @@
     $('ringText').textContent = S.step;
     $('marks').innerHTML = Array.from({ length: LAST }, (_, i) => `<i class="${i + 1 < S.step ? 'done' : i + 1 === S.step ? 'now' : ''}" style="left:${(i / (LAST - 1)) * 100}%"></i>`).join('');
     $('runner').style.setProperty('--x', pct + '%');
-    $('track').setAttribute('aria-label', `Step ${S.step} of ${LAST} on the way to ${GOAL.short}`);
+    $('track').setAttribute('aria-label', `Level ${S.step} of ${LAST} on the way to ${GOAL.short}`);
     $('tapeLabel').textContent = GOAL.tape;
-    $('ladderTitle').textContent = `All ${LAST} steps`;
+    $('ladderTitle').textContent = `All ${LAST} levels`;
     $('finishLead').textContent = S.done ? 'You did it:' : `${GOAL.short} by`;
     $('finishDate').textContent = S.done ? GOAL.short : fmtDate(targetDate());
     $('finishNote').textContent = S.done ? (S.runGoal === '5k' ? 'Next goal: 10K. Add it from your goals.' : 'Keep running for fun, and pick a new goal when you like.') : '';
@@ -583,9 +583,12 @@
 
     // COACH tab: today's conversation, starting with the coach's own message
     const opener = S.morning?.date === dayKey() ? `<div class="bubble ai">${esc(S.morning.message)}<span class="meta">Coach, today</span></div>` : '';
+    const flowBtns = S.flow && S.flow.date === dayKey() ? (S.flow.stage === 'pain'
+      ? '<div class="quick"><button data-flow="nopain">No pain</button><button data-flow="pain">Yes, some pain</button></div>'
+      : '<div class="quick"><button data-flow="yes">Yes, move me up</button><button data-flow="no">Not now</button></div>') : '';
     $('thread').innerHTML = opener + todays.map((l) => `
       <div class="bubble me">${esc(l.text)}</div>
-      <div class="bubble ai ${l.parsed?.red_flag ? 'red' : ''}">${esc(l.parsed?.reply || '')}${l.note ? `<span class="meta">${esc(l.note)}</span>` : ''}</div>`).join('');
+      <div class="bubble ai ${l.parsed?.red_flag ? 'red' : ''}">${esc(l.parsed?.reply || '')}${l.note ? `<span class="meta">${esc(l.note)}</span>` : ''}</div>`).join('') + flowBtns;
 
     // WEEK tab
     let bars = ''; const vals = [];
@@ -686,7 +689,7 @@
     show('goals');
     $('goalList').innerHTML = Object.entries(S.goals).map(([id, g]) => {
       let prog = 'No targets, just awareness';
-      if (isRun(id)) { const st = S.runGoal === id ? S : g; const steps = GOALS[id].steps.length - 1; prog = st.done ? 'Finished 🏁' : `Step ${st.step} of ${steps}`; }
+      if (isRun(id)) { const st = S.runGoal === id ? S : g; const steps = GOALS[id].steps.length - 1; prog = st.done ? 'Finished 🏁' : `Level ${st.step} of ${steps}`; }
       return `<div class="goal-card ${S.goal === id ? 'focus' : ''}">
         <button class="goal-pick" data-goal="${id}"><span class="g-tape">${GOALS[id].tape}</span><span class="g-text"><b>${esc(labelOf(id))}</b><span>${prog}</span></span></button>
         <button class="g-edit" data-edit="${id}" aria-label="Edit this goal">Edit</button>
@@ -711,6 +714,47 @@
 
   const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
 
+  // ---------- Asking to move up a level: the coach checks for pain, Rizwan confirms ----------
+  const LEVEL_UP_RE = /(harder|move (me )?up|level up|next level|increase (my|the) (distance|run|goal)|change my goal|run (more|further|longer)|from \d+(\.\d+)?\s*km to \d+)/i;
+  function recentPain() {
+    const since = dayKey(addDays(new Date(), -3));
+    const l = [...S.logs].reverse().find((x) => x.date >= since && ((x.parsed?.log?.symptoms || []).length || x.parsed?.red_flag));
+    return l ? { when: l.date === dayKey() ? 'today' : fmtDate(l.date), what: (l.parsed.log.symptoms || ['a warning sign']).join(', ') } : null;
+  }
+  function flowSay(text, reply, ask) {
+    S.logs.push({ date: dayKey(), at: Date.now(), kind: 'flow', text, parsed: { log: { meals: [], symptoms: [] }, reply } });
+    S.flow = ask ? { stage: ask, date: dayKey() } : null;
+  }
+  function startLevelUp() {
+    const last = S.logs[S.logs.length - 1];
+    if (S.step >= LAST) { last.parsed.reply = 'You are already on the last level. Run it twice comfortably and the finish line is yours.'; S.flow = null; return; }
+    if (S.redFlag) { last.parsed.reply = 'Training is paused because of the warning sign you mentioned. Please see a doctor first; then we can move up.'; S.flow = null; return; }
+    const pain = recentPain();
+    if (pain) { last.parsed.reply = `You mentioned ${pain.what} (${pain.when}). Let's hold Level ${S.step} until that has settled for a few days.`; S.flow = null; return; }
+    last.parsed.reply = `Happy to look at moving you up. First: any pain or discomfort in your body right now, like your back, knees or shins?`;
+    S.flow = { stage: 'pain', date: dayKey() };
+  }
+  function answerFlow(ans) {
+    if (!S.flow) return;
+    if (S.flow.stage === 'pain') {
+      if (ans === 'pain') {
+        flowSay('Yes, some pain', `Thanks for telling me. We'll stay on Level ${S.step} and keep it easy. If it keeps coming back, see a doctor or physio.`, null);
+        const l = S.logs[S.logs.length - 1]; l.parsed.log.symptoms = ['some pain'];
+      } else {
+        flowSay('No pain', `Great. Level ${S.step + 1} is: ${stepText(S.step + 1)}. Move up now? You can always come back down if it feels too hard.`, 'confirm');
+      }
+    } else if (S.flow.stage === 'confirm') {
+      if (ans === 'yes') {
+        S.step += 1; S.atStep = 0; S.lastChangeDay = dayKey(); S.nextRest = false;
+        flowSay('Yes, move me up', `Done. You're on Level ${S.step} now: ${stepText(S.step)}. Warm up well and keep the runs easy.`, null);
+        S.logs[S.logs.length - 1].note = `Moved up to Level ${S.step} at your request.`;
+      } else {
+        flowSay('Not now', `No problem. Staying on Level ${S.step}. Two good runs here and you'll move up anyway.`, null);
+      }
+    }
+    save(); renderToday(); window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  }
+
   async function checkin() {
     const box = $('ciText'); const text = box.value.trim();
     if (!text) return;
@@ -729,9 +773,12 @@
     if (p.red_flag && !/doctor/i.test(p.reply || '')) p.reply = 'Please stop training today and see a doctor. If it was chest pain or fainting, get medical help urgently.';
     let note = '';
     if (!p.needs_question) note = applyAction(p);
+    const wantsUp = p.intent === 'level_up' || LEVEL_UP_RE.test(text);
+    if (wantsUp && hasRun()) { p.plan_action = 'repeat'; p.needs_question = true; }
     if (p.ramadan_detected && !S.ramadan) { S.ramadan = true; toast('Ramadan mode on: runs move to after iftar. Tap 🌙 to turn it off.', 5000); }
     delete p._text;
     S.logs.push({ date: dayKey(), at: Date.now(), text, parsed: p, note });
+    if (wantsUp && hasRun()) startLevelUp();
     save();
     $('ciSend').disabled = false;
     renderToday();
@@ -817,6 +864,7 @@
   });
   document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.go)));
   document.querySelectorAll('#tabbar button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+  $('thread').addEventListener('click', (e) => { const b = e.target.closest('[data-flow]'); if (b) answerFlow(b.dataset.flow); });
   $('tellCoach').addEventListener('click', () => { setTab('coach'); setTimeout(() => $('ciText').focus(), 50); });
   $('miniStats').addEventListener('click', (e) => {
     if (!e.target.closest('#stepsAdd')) return;

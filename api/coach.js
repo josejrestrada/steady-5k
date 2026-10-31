@@ -46,6 +46,8 @@ RULES (never break these):
 9. Never sell, link or recommend products or brands.
 11. Calories: never suggest or set a calorie target yourself. Rizwan may set his own goal (the app only accepts 1,800 to 4,500 kcal); respect it, but never suggest skipping a meal, eating under 1,800 kcal, or eating less on a run day. Fuel for running comes first.
 10. If he asks a question about the future (e.g. "should I run tomorrow?"), answer it within these rules, log nothing as done, and use plan_action "repeat" unless rest is clearly right. When he is fasting, hydration advice means drinking between iftar and sehri, never during the fast.
+12. When you talk to him, call the plan stages "levels" (for example "Level 3"); the word "steps" means only the steps his phone counts.
+13. If he asks to make the plan harder, run further, change his distance target upwards or move up a level, set intent "level_up", plan_action "repeat", log nothing as done, and reply in one short sentence that you will check a couple of things first. Never move him up yourself.
 Output ONLY valid JSON matching the requested shape.`;
 
 function prompt(mode, text, ctx) {
@@ -91,7 +93,7 @@ Context (today's planned session, plan step, sessions done at this step, Ramadan
 How to judge the run: walk breaks are PART of steps 1-10, so walking during the breaks is not failing. Compare what he did with the planned session in context: if he ran at least the planned total running time or distance (or ran further, or ran non-stop longer than the plan asks) with no pain, he completed it. If he clearly beat the plan, say so with real praise in the reply.
 plan_action rules: "up" if he completed today's planned session (as judged above) with no pain; "repeat" if partly done, tough, or no run today; "down" if pain, he struggled badly, or he missed 4+ days; "rest" for red flags, illness, exhaustion, or a match/tournament day.
 ramadan_detected=true if he mentions roza, fasting, sehri or iftar as happening now.
-Return JSON: {"log": {"run_km": number|null, "run_min": number|null, "walk_breaks": number|null, "ran_nonstop": boolean|null, "steps": number|null, "water_l": number|null, "sleep_h": number|null, "meals": [{"item": string, "kcal_low": number, "kcal_high": number}], "fasting": boolean|null, "symptoms": [string]}, "red_flag": boolean, "ramadan_detected": boolean, "plan_action": "up"|"repeat"|"down"|"rest", "nudge": "water"|"sleep"|"food"|"run"|"none", "needs_question": boolean, "reply": string}`;
+Return JSON: {"log": {"run_km": number|null, "run_min": number|null, "walk_breaks": number|null, "ran_nonstop": boolean|null, "steps": number|null, "water_l": number|null, "sleep_h": number|null, "meals": [{"item": string, "kcal_low": number, "kcal_high": number}], "fasting": boolean|null, "symptoms": [string]}, "red_flag": boolean, "ramadan_detected": boolean, "plan_action": "up"|"repeat"|"down"|"rest", "nudge": "water"|"sleep"|"food"|"run"|"none", "needs_question": boolean, "intent": "level_up"|"none", "reply": string}`;
 }
 
 async function callGemini(model, key, body) {
