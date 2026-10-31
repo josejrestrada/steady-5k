@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Steady 5K</title>
   <meta name="description" content="A running coach that gets you to 5K without stopping. One message a day, no forms.">
-  <meta name="theme-color" content="#1F4FB8">
+  <meta name="theme-color" content="#0A1222">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;1,700;1,800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -22,7 +22,6 @@
       </div>
     </header>
     <div id="menu" class="menu" hidden>
-      <button data-act="history">Past days</button>
       <button data-act="sample">Load sample week (made-up data)</button>
       <button data-act="reset" class="danger">Start over</button>
     </div>
@@ -48,69 +47,102 @@
       <p class="notice">Not medical advice. Steady does not diagnose or prescribe. If you have chest pain, faint, or feel dizzy, stop and see a doctor.</p>
     </main>
 
-    <!-- TODAY -->
-    <main id="today" class="view" hidden>
-      <section class="coach-card" aria-live="polite">
-        <div class="coach-head"><span class="coach-dot" aria-hidden="true"></span>Coach <span id="coachTime"></span></div>
-        <p id="coachMsg" class="coach-msg">…</p>
-      </section>
+    <!-- MAIN APP: four tabs -->
+    <div id="main" hidden>
+      <!-- TODAY -->
+      <main id="tab-today" class="panel" aria-labelledby="t-today">
+        <p id="dayLabel" class="day-label"></p>
+        <h1 class="day-title">Today</h1>
 
-      <section id="flagBanner" class="flag" hidden>
-        <strong>Training paused.</strong>
-        <span id="flagText">You mentioned a warning sign. Please see a doctor before your next run.</span>
-        <button id="flagClear" class="btn-small">A doctor has checked me / I feel fine now</button>
-      </section>
+        <section id="flagBanner" class="flag" hidden>
+          <strong>Training paused.</strong>
+          <span id="flagText">You mentioned a warning sign. Please see a doctor before your next run.</span>
+          <button id="flagClear" class="btn-small">A doctor has checked me / I feel fine now</button>
+        </section>
 
-      <section class="track-panel" aria-label="Your progress to 5K">
-        <div class="track-head">
-          <p class="finish-title"><span id="finishLead">5K non-stop by</span> <strong id="finishDate">—</strong></p>
-          <p id="finishNote" class="small"></p>
+        <section class="rings-card" aria-label="Today's goals">
+          <div class="rings" id="rings"></div>
+          <ul class="legend" id="legend"></ul>
+        </section>
+        <div class="mini-stats" id="miniStats"></div>
+
+        <section class="coach-card" aria-live="polite">
+          <div class="coach-head"><span class="coach-dot" aria-hidden="true"></span>Coach <span id="coachTime"></span></div>
+          <p id="coachMsg" class="coach-msg">…</p>
+        </section>
+
+        <section class="card next">
+          <h3 class="sec-title" id="nextLabel">Next run</h3>
+          <div class="stopwatch" id="nextSession">—</div>
+          <p id="nextHint" class="small"></p>
+          <button class="btn-link left" data-go="plan">See the full session</button>
+        </section>
+
+        <button id="tellCoach" class="btn-primary">Tell the coach about your day</button>
+        <p class="notice">Not medical advice. Steady does not diagnose or prescribe. Prototype for a class project; use made-up data only.</p>
+      </main>
+
+      <!-- PLAN -->
+      <main id="tab-plan" class="panel" hidden>
+        <h1 class="day-title">Plan</h1>
+        <section class="track-panel" aria-label="Your progress to 5K">
+          <div class="track-head">
+            <p class="finish-title"><span id="finishLead">5K non-stop by</span> <strong id="finishDate">—</strong></p>
+            <p id="finishNote" class="small" hidden></p>
+          </div>
+          <div class="track" id="track">
+            <div class="lane-lines" aria-hidden="true"></div>
+            <div class="marks" id="marks" aria-hidden="true"></div>
+            <div class="runner" id="runner"><span class="bib">Step</span><b id="ringText">1</b></div>
+            <div class="tape" aria-hidden="true"><span>5K</span></div>
+          </div>
+        </section>
+        <section class="card">
+          <h3 class="sec-title" id="planLabel">Next session</h3>
+          <div id="nextPlan"></div>
+        </section>
+        <section class="card">
+          <h3 class="sec-title">All 13 steps</h3>
+          <ol class="ladder" id="ladder"></ol>
+        </section>
+      </main>
+
+      <!-- COACH -->
+      <main id="tab-coach" class="panel" hidden>
+        <h1 class="day-title">Coach</h1>
+        <p class="lede small">Tell me about your day in one message: run, steps, food, water, sleep. Type it or say it.</p>
+        <section class="thread" id="thread"></section>
+        <div class="spacer"></div>
+      </main>
+
+      <!-- WEEK -->
+      <main id="tab-week" class="panel" hidden>
+        <h1 class="day-title">Week</h1>
+        <section class="card">
+          <h3 class="sec-title">Kilometres, last 7 days</h3>
+          <div class="weekbars" id="weekbars"></div>
+        </section>
+        <section class="card">
+          <h3 class="sec-title">Past days</h3>
+          <div id="histList"></div>
+        </section>
+      </main>
+
+      <footer id="dock" class="dock" hidden>
+        <div class="composer">
+          <textarea id="ciText" rows="1" placeholder="How did today go? Run, steps, food, water, sleep."></textarea>
+          <button class="mic" data-target="ciText" aria-label="Speak instead"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+          <button id="ciSend" class="send" aria-label="Send check-in"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 12h13M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
-        <div class="track" id="track">
-          <div class="lane-lines" aria-hidden="true"></div>
-          <div class="marks" id="marks" aria-hidden="true"></div>
-          <div class="runner" id="runner"><span class="bib">Step</span><b id="ringText">1</b></div>
-          <div class="tape" aria-hidden="true"><span>5K</span></div>
-        </div>
-      </section>
+      </footer>
 
-      <section class="card next">
-        <h3 class="sec-title" id="nextLabel">Next run</h3>
-        <div class="stopwatch" id="nextSession">—</div>
-        <p id="nextHint" class="muted small"></p>
-        <div id="nextPlan"></div>
-      </section>
-
-      <section class="card today-card">
-        <h3 class="sec-title">Today</h3>
-        <div class="chips" id="chips"></div>
-      </section>
-
-      <section class="thread" id="thread"></section>
-
-      <section class="week card">
-        <h3 class="sec-title">Kilometres, last 7 days</h3>
-        <div class="weekbars" id="weekbars"></div>
-      </section>
-
-      <p class="notice">Not medical advice. Steady does not diagnose or prescribe. Prototype for a class project; use made-up data only.</p>
-      <div class="spacer"></div>
-    </main>
-
-    <!-- HISTORY -->
-    <main id="history" class="view" hidden>
-      <button class="btn-link back" data-go="today">← Today</button>
-      <h2>Past days</h2>
-      <div id="histList"></div>
-    </main>
-
-    <footer id="dock" class="dock" hidden>
-      <div class="composer">
-        <textarea id="ciText" rows="1" placeholder="How did today go? Run, steps, food, water, sleep — just say it."></textarea>
-        <button class="mic" data-target="ciText" aria-label="Speak instead"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <button id="ciSend" class="send" aria-label="Send check-in"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 12h13M12 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-      </div>
-    </footer>
+      <nav class="tabbar" id="tabbar" aria-label="Sections">
+        <button data-tab="today" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/></svg>Today</button>
+        <button data-tab="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V6M4 6h12l-2.5 3.5L16 13H4"/></svg>Plan</button>
+        <button data-tab="coach"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v10H10l-4 4v-4H5z"/></svg>Coach</button>
+        <button data-tab="week"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-6M10 20V9M15 20v-8M20 20V5"/></svg>Week</button>
+      </nav>
+    </div>
 
     <div id="toast" class="toast" hidden></div>
   </div>

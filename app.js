@@ -233,16 +233,76 @@
   }
 
   // ---------- Rendering ----------
+  let tab = 'today';
   function show(view) {
-    for (const v of ['onboard', 'today', 'history']) $(v).hidden = v !== view;
-    $('dock').hidden = view !== 'today';
+    $('onboard').hidden = view !== 'onboard';
+    $('main').hidden = view !== 'main';
     $('ramadanBtn').hidden = view === 'onboard';
+  }
+  function setTab(t) {
+    tab = t;
+    for (const n of ['today', 'plan', 'coach', 'week']) $('tab-' + n).hidden = n !== t;
+    document.querySelectorAll('#tabbar button').forEach((b) => b.toggleAttribute('aria-current', b.dataset.tab === t));
+    $('dock').hidden = t !== 'coach';
+    $('tabbar').hidden = false;
+    window.scrollTo(0, t === 'coach' ? document.body.scrollHeight : 0);
+  }
+
+  // Planned running distance for a step, at an easy beginner pace of about 7 min per km.
+  function planKm(n) {
+    const st = STEPS[n];
+    if (n === LAST) return 5;
+    const mins = st.nonstop ? parseInt(st.nonstop, 10) : st.run * st.reps;
+    return Math.max(1, Math.round((mins / 7) * 10) / 10);
+  }
+
+  function ringsSVG(parts) {
+    const C = 90, W = 13, gap = 3;
+    const arcs = parts.map((p, i) => {
+      const r = 76 - i * (W + gap), len = 2 * Math.PI * r, f = Math.max(0, Math.min(1, p.frac || 0));
+      return `<circle cx="${C}" cy="${C}" r="${r}" class="r-bg" style="stroke:${p.color}"/>` +
+        `<circle cx="${C}" cy="${C}" r="${r}" class="r-fg" style="stroke:${p.color};stroke-dasharray:${len};stroke-dashoffset:${len * (1 - f)}"/>`;
+    }).join('');
+    return `<svg viewBox="0 0 180 180" role="img" aria-label="${parts.map((p) => `${p.label} ${p.text}`).join(', ')}">${arcs}</svg>`;
   }
 
   function renderToday() {
-    show('today');
+    show('main');
     $('ramadanBtn').setAttribute('aria-pressed', String(!!S.ramadan));
-    // finish line
+    $('dayLabel').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+    $('flagBanner').hidden = !S.redFlag;
+
+    // Rings: run, water, sleep
+    const T = dayTotals(dayKey());
+    const resting = S.redFlag || S.nextRest;
+    const runGoal = planKm(S.step), waterGoal = S.ramadan ? 2.5 : 3, sleepGoal = 8;
+    const parts = [
+      { label: 'Run', color: 'var(--c-run)', frac: resting ? (T.run ? 1 : 0) : T.run_km / runGoal, text: resting ? (T.run ? `${+T.run_km.toFixed(1)} km` : 'Rest day') : `${+T.run_km.toFixed(1)} / ${runGoal} km` },
+      { label: S.ramadan ? 'Water, iftar to sehri' : 'Water', color: 'var(--c-water)', frac: T.water_l / waterGoal, text: `${+T.water_l.toFixed(1)} / ${waterGoal} L` },
+      { label: 'Sleep', color: 'var(--c-sleep)', frac: (T.sleep_h || 0) / sleepGoal, text: `${T.sleep_h ?? 0} / ${sleepGoal} h` },
+    ];
+    $('rings').innerHTML = ringsSVG(parts);
+    $('legend').innerHTML = parts.map((p) => `<li><i style="background:${p.color}"></i><span>${p.label}</span><b>${p.text}</b></li>`).join('');
+    const mini = (label, val, sub) => `<div class="mini"><b>${val}</b><span>${label}${sub ? `<br><small>${sub}</small>` : ''}</span></div>`;
+    $('miniStats').innerHTML = [
+      mini('Steps', T.hasSteps ? T.steps.toLocaleString('en-IN') : '—', 'from your phone'),
+      mini('Food', T.food ? `${Math.round(T.kLow / 50) * 50}–${Math.round(T.kHigh / 50) * 50}` : '—', 'kcal, approx.'),
+      S.ramadan || T.fasting ? mini('Fast', T.fasting ? 'Yes' : '—', 'Ramadan mode') : '',
+    ].join('');
+
+    // Coach card: the latest thing the coach said today
+    const todays = logsFor(dayKey());
+    const last = todays[todays.length - 1];
+    if (last) { $('coachMsg').textContent = last.parsed?.reply || ''; $('coachTime').textContent = 'replying to your check-in'; }
+    else if (S.morning?.date === dayKey()) { $('coachMsg').textContent = S.morning.message; $('coachTime').textContent = 'today'; }
+
+    // Next session
+    const total = (n) => sessionMinutes(n) + 16;
+    if (S.redFlag) { $('nextLabel').textContent = 'Paused'; $('nextSession').innerHTML = '<span class="sw-text">No running until you feel OK</span>'; $('nextHint').textContent = 'See a doctor about the warning sign you mentioned.'; }
+    else if (S.nextRest) { $('nextLabel').textContent = 'Next session'; $('nextSession').innerHTML = '<span class="sw-text">Rest day. An easy walk if you like.</span>'; $('nextHint').textContent = `Then: ${stepText(S.step)}`; }
+    else { $('nextLabel').textContent = 'Next run'; $('nextSession').innerHTML = stepHTML(S.step); $('nextHint').textContent = `About ${total(S.step)} min with warm-up and cool-down${S.ramadan ? ', after iftar' : ''}.`; }
+
+    // PLAN tab
     const pct = Math.round(((S.step - 1) + S.atStep / SESSIONS_PER_STEP) / (LAST - 1) * 100);
     $('ringText').textContent = S.step;
     $('marks').innerHTML = Array.from({ length: LAST }, (_, i) => `<i class="${i + 1 < S.step ? 'done' : i + 1 === S.step ? 'now' : ''}" style="left:${(i / (LAST - 1)) * 100}%"></i>`).join('');
@@ -252,56 +312,39 @@
     $('finishDate').textContent = S.done ? '5K non-stop' : fmtDate(targetDate());
     $('finishNote').textContent = S.done ? 'Next goal: 10K. Ask the coach when you are ready.' : '';
     $('finishNote').hidden = !S.done;
-    // next session
-    const total = (n) => sessionMinutes(n) + 16;
-    if (S.redFlag) { $('nextLabel').textContent = 'Paused'; $('nextSession').innerHTML = '<span class="sw-text">No running until you feel OK</span>'; $('nextHint').textContent = 'See a doctor about the warning sign you mentioned.'; $('nextPlan').innerHTML = ''; }
-    else if (S.nextRest) { $('nextLabel').textContent = 'Next session'; $('nextSession').innerHTML = '<span class="sw-text">Rest day. An easy walk if you like.</span>'; $('nextHint').textContent = `Then: ${stepText(S.step)}`; $('nextPlan').innerHTML = `<details class="plan"><summary>See the full rest-day plan</summary>${sessionPlan(S.step, 'rest')}</details>`; }
-    else { $('nextLabel').textContent = 'Next run'; $('nextSession').innerHTML = stepHTML(S.step); $('nextHint').textContent = `About ${total(S.step)} min with warm-up and cool-down${S.ramadan ? ', after iftar' : ''}`; $('nextPlan').innerHTML = `<details class="plan" ${S.planOpen ? 'open' : ''}><summary>See the full session</summary>${sessionPlan(S.step, 'run')}</details>`; $('nextPlan').querySelector('details').addEventListener('toggle', (e) => { S.planOpen = e.target.open; save(); }); }
-    // red flag
-    $('flagBanner').hidden = !S.redFlag;
-    // chips
-    const T = dayTotals(dayKey());
-    const waterGoal = S.ramadan ? 'aim ~2.5 L, iftar→sehri' : 'aim ~3 L';
-    const chip = (label, val, sub, on) => `<div class="chip ${on ? '' : 'empty'}"><b>${val}</b><span>${label}</span>${sub ? `<span>${sub}</span>` : ''}</div>`;
-    $('chips').innerHTML = [
-      chip('Run', T.run ? `${+T.run_km.toFixed(1)} km` : '—', '', T.run),
-      chip('Steps', T.hasSteps ? T.steps.toLocaleString('en-IN') : '—', 'from phone', T.hasSteps),
-      chip('Water', T.water ? `${+T.water_l.toFixed(1)} L` : '—', waterGoal, T.water),
-      chip('Sleep', T.sleep_h != null ? `${T.sleep_h} h` : '—', '', T.sleep_h != null),
-      chip('Food', T.food ? `${Math.round(T.kLow / 50) * 50}–${Math.round(T.kHigh / 50) * 50}` : '—', 'kcal approx.', T.food),
-      S.ramadan || T.fasting ? chip('Fast', T.fasting ? 'Fasting' : '—', S.ramadan ? 'Ramadan' : '', T.fasting) : '',
-    ].join('');
-    // thread
-    $('thread').innerHTML = logsFor(dayKey()).map((l) => `
+    $('planLabel').textContent = S.redFlag ? 'Paused' : S.nextRest ? 'Rest day' : `Next run: ${stepText(S.step)}`;
+    $('nextPlan').innerHTML = S.redFlag ? '<p class="small">No session until you have seen a doctor about the warning sign, or you feel completely fine.</p>'
+      : sessionPlan(S.step, S.nextRest ? 'rest' : 'run');
+    $('ladder').innerHTML = STEPS.slice(1).map((_, i) => { const n = i + 1; return `<li class="${n < S.step ? 'done' : n === S.step ? 'now' : ''}"><span class="n">${n}</span><span>${stepText(n)}</span>${n === S.step ? '<em>You are here</em>' : ''}</li>`; }).join('');
+
+    // COACH tab: today's conversation, starting with the coach's own message
+    const opener = S.morning?.date === dayKey() ? `<div class="bubble ai">${esc(S.morning.message)}<span class="meta">Coach, today</span></div>` : '';
+    $('thread').innerHTML = opener + todays.map((l) => `
       <div class="bubble me">${esc(l.text)}</div>
       <div class="bubble ai ${l.parsed?.red_flag ? 'red' : ''}">${esc(l.parsed?.reply || '')}${l.note ? `<span class="meta">${esc(l.note)}</span>` : ''}</div>`).join('');
-    // week
+
+    // WEEK tab
     let bars = ''; const vals = [];
     for (let i = 6; i >= 0; i--) { const k = dayKey(addDays(new Date(), -i)); vals.push([k, dayTotals(k).run_km]); }
     const max = Math.max(3, ...vals.map((v) => v[1]));
     for (const [k, v] of vals) bars += `<div class="wb ${k === dayKey() ? 'today' : ''}"><span>${v ? +v.toFixed(1) : ''}</span><i style="height:${(v / max) * 70}%"></i>${new Date(k).toLocaleDateString('en-IN', { weekday: 'narrow' })}</div>`;
     $('weekbars').innerHTML = bars;
+    const days = [...new Set(S.logs.map((l) => l.date))].sort().reverse();
+    $('histList').innerHTML = days.length ? days.map((k) => {
+      const D = dayTotals(k);
+      const facts = [D.run ? `Ran ${+D.run_km.toFixed(1)} km` : 'No run', D.hasSteps ? `${D.steps.toLocaleString('en-IN')} steps` : '', D.water ? `${+D.water_l.toFixed(1)} L water` : '', D.sleep_h != null ? `${D.sleep_h} h sleep` : '', D.food ? `about ${Math.round(D.kLow)}–${Math.round(D.kHigh)} kcal` : ''].filter(Boolean).join(', ');
+      return `<div class="hist-day"><h4>${fmtDate(k)}</h4><p>${facts}.</p>${logsFor(k).map((l) => `<p class="said">“${esc(l.text)}”</p><p class="replied">${esc(l.parsed?.reply || '')}</p>`).join('')}</div>`;
+    }).join('') : '<p class="small">Nothing logged yet. Your check-ins will show up here.</p>';
   }
 
   async function morning(force = false) {
     const today = dayKey();
-    if (!force && S.morning?.date === today) { $('coachMsg').textContent = S.morning.message; $('coachTime').textContent = 'today'; return; }
+    if (!force && S.morning?.date === today) { renderToday(); return; }
     $('coachMsg').textContent = 'Looking at how yesterday went…'; $('coachMsg').classList.add('loading');
     const r = await ai('morning', '', context());
     $('coachMsg').classList.remove('loading');
     S.morning = { date: today, message: r.message || `Today: ${stepText(S.step)}.` }; save();
-    $('coachMsg').textContent = S.morning.message; $('coachTime').textContent = 'today';
-  }
-
-  function renderHistory() {
-    show('history');
-    const days = [...new Set(S.logs.map((l) => l.date))].sort().reverse();
-    $('histList').innerHTML = days.length ? days.map((k) => {
-      const T = dayTotals(k);
-      return `<div class="hist-day"><h4>${fmtDate(k)}</h4>
-        <p>${T.run ? `Ran ${+T.run_km.toFixed(1)} km` : 'No run'} · Water ${T.water ? +T.water_l.toFixed(1) + ' L' : '—'} · Sleep ${T.sleep_h ?? '—'} h${T.food ? ` · ~${Math.round(T.kLow)}–${Math.round(T.kHigh)} kcal` : ''}</p>
-        ${logsFor(k).map((l) => `<p>“${esc(l.text)}” → <em>${esc(l.parsed?.reply || '')}</em></p>`).join('')}</div>`;
-    }).join('') : '<p class="muted">Nothing logged yet.</p>';
+    renderToday();
   }
 
   // ---------- Actions ----------
@@ -313,9 +356,8 @@
     S = { v: 1, created: dayKey(), step: clamp(+r.start_step || 3, 1, LAST), atStep: 0, runsPerWeek: clamp(+r.runs_per_week || 3, 2, 5), ramadan: !!r.ramadan, logs: [], intro: text };
     save();
     $('onGo').disabled = false; $('onGo').textContent = 'Build my plan';
-    renderToday();
     S.morning = { date: dayKey(), message: r.reply || `Plan ready. Start with: ${stepText(S.step)}.` }; save();
-    $('coachMsg').textContent = S.morning.message; $('coachTime').textContent = 'just now';
+    renderToday(); setTab('today');
   }
   const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
 
@@ -359,7 +401,7 @@
       ],
     };
     S.morning = { date: dayKey(), message: 'Back was stiff yesterday, so today is your normal session, nice and easy. Get 3 bottles of water in before evening.' };
-    save(); $('menu').hidden = true; renderToday(); morning(true);
+    save(); $('menu').hidden = true; renderToday(); setTab('today'); morning(true);
   }
 
   // ---------- Voice input (browser speech recognition, Indian English) ----------
@@ -393,9 +435,10 @@
     const a = e.target.dataset.act; if (!a) return; $('menu').hidden = true;
     if (a === 'reset' && confirmReset()) { try { localStorage.removeItem(KEY); } catch {} S = null; start(); }
     if (a === 'sample') loadSample();
-    if (a === 'history' && S) renderHistory();
   });
-  document.querySelectorAll('[data-go="today"]').forEach((b) => b.addEventListener('click', () => S && renderToday()));
+  document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.go)));
+  document.querySelectorAll('#tabbar button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
+  $('tellCoach').addEventListener('click', () => { setTab('coach'); setTimeout(() => $('ciText').focus(), 50); });
   function confirmReset() {
     const b = document.querySelector('[data-act="reset"]');
     if (b.dataset.armed) return true;
@@ -406,7 +449,7 @@
 
   function start() {
     if (!S) { show('onboard'); return; }
-    renderToday(); morning();
+    renderToday(); setTab('today'); morning();
   }
   start();
 })();

@@ -139,14 +139,14 @@ That is 9 of 18 class features built in some form, most of them reshaped, plus 6
 
 *First two minutes.* Rizwan opens the link and sees one question: "How's your running right now?" He types or says "I can run about 1.5 km before I need to walk, 3 days a week." In the live test the AI placed him on step 3 of 13 (run 2 minutes, walk 1.5 minutes, six times), set a finish line of mid-December for 5K non-stop, and confirmed where he starts. No sign-up, no form.
 
-*A normal day.* The coach's message is waiting when he opens the app; "See the full session" gives the warm-up, run and cool-down. In the evening he sends one check-in, typed or spoken: "ran 2.5k, walked twice, 7k steps, 3 bottles water, slept 1 to 7, rice and fish curry for lunch." The app fills in run, steps, water, sleep and an approximate calorie range, replies in two lines, and moves the plan up, holds it, or eases off. If he reports back pain, tomorrow gets easier; if he reports chest tightness, training pauses.
+*A normal day.* The coach's message is waiting when he opens the app, above three goal rings for run, water and sleep; the Plan tab gives the full warm-up, run and cool-down. In the evening he sends one check-in, typed or spoken: "ran 2.5k, walked twice, 7k steps, 3 bottles water, slept 1 to 7, rice and fish curry for lunch." The app fills in run, steps, water, sleep and an approximate calorie range, replies in two lines, and moves the plan up, holds it, or eases off. If he reports back pain, tomorrow gets easier; if he reports chest tightness, training pauses.
 
 *Screenshots.* Rendered from the deployed code (final design), replaying the replies the live AI gave at steady-5k.vercel.app on 31 October.
 
-| 1. Setup: one question, no form | 2. Plan and finish line after setup | 3. Evening check-in, logged and answered |
+| 1. Setup: one question, no form | 2. Today: goal rings for run, water and sleep | 3. Coach tab: evening check-in, logged and answered |
 |---|---|---|
 | <img src="docs/screenshots/1-setup.png" width="230"> | <img src="docs/screenshots/2-today.png" width="230"> | <img src="docs/screenshots/3-checkin.png" width="230"> |
-| **4. Full session guide** | **5. Ramadan mode switches on by itself** | **6. Red flag pauses training** |
+| **4. Plan tab: finish line and full session** | **5. Ramadan mode switches on by itself** | **6. Red flag pauses training** |
 | <img src="docs/screenshots/4-full-session.png" width="230"> | <img src="docs/screenshots/5-ramadan.png" width="230"> | <img src="docs/screenshots/6-red-flag.png" width="230"> |
 
 **My three hardest calls:**
