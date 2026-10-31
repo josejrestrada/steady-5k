@@ -167,6 +167,12 @@
       next_session: S.nextRest ? 'Rest day' : sessionLine(S.step), plan_level: `${S.step}/${LAST}`, good_runs_at_this_level: `${S.atStep}/${SESSIONS_PER_STEP}`,
       ramadan_mode: S.ramadan, days_since_last_run: daysSinceRun(), runs_per_week: S.runsPerWeek,
       paused_for_red_flag: !!S.redFlag, recent_checkins: recent,
+      planned_run_min: hasRun() && !S.nextRest ? plannedRunMin(S.step) : 0,
+      conversation_today: [
+        ...(S.morning?.date === dayKey() ? [{ coach: S.morning.message }] : []),
+        ...S.logs.filter((l) => l.date === dayKey() && !['meal', 'water'].includes(l.kind)).slice(-6)
+          .flatMap((l) => [{ rizwan: l.text.slice(0, 200) }, { coach: (l.parsed?.reply || '').slice(0, 200) }]),
+      ],
     };
   }
 
@@ -294,6 +300,8 @@
     if (v.runs) return `${v.name}: run ${v.runs.join(', ')} min, walking ${st.walk} min between`;
     return `${v.name}: ${stepText(n)}`;
   }
+
+  function plannedRunMin(n) { const st = STEPS[n]; return st.nonstop ? (st.mins || parseInt(st.nonstop, 10)) : st.run * st.reps; }
 
   function stepHTML(n) {
     const st = STEPS[n];
@@ -594,9 +602,13 @@
 
     // COACH tab: today's conversation, starting with the coach's own message
     const opener = S.morning?.date === dayKey() ? `<div class="bubble ai">${esc(S.morning.message)}<span class="meta">Coach, today</span></div>` : '';
-    const flowBtns = S.flow && S.flow.date === dayKey() ? (S.flow.stage === 'pain'
+    const lastTalk = todays[todays.length - 1];
+    const runBtns = !S.flow && lastTalk?.parsed?.quick === 'run' && hasRun()
+      ? '<div class="quick"><button data-say="Yes, I did the full session">Yes, the full session</button><button data-say="I did part of it">Part of it</button><button data-say="No run today">No run today</button></div>' : '';
+    const levelBtns = S.flow && S.flow.date === dayKey() ? (S.flow.stage === 'pain'
       ? '<div class="quick"><button data-flow="nopain">No pain</button><button data-flow="pain">Yes, some pain</button></div>'
       : '<div class="quick"><button data-flow="yes">Yes, move me up</button><button data-flow="no">Not now</button></div>') : '';
+    const flowBtns = levelBtns || runBtns;
     $('thread').innerHTML = opener + todays.map((l) => `
       <div class="bubble me">${esc(l.text)}</div>
       <div class="bubble ai ${l.parsed?.red_flag ? 'red' : ''}">${esc(l.parsed?.reply || '')}${l.note ? `<span class="meta">${esc(l.note)}</span>` : ''}</div>`).join('') + flowBtns;
@@ -776,6 +788,20 @@
     const p = await ai('checkin', text, context());
     p._text = text;
     // Backfill: if the AI missed a number that is plainly in the message, take it from a simple local parse.
+    // He confirmed today's planned session without details: log it as the planned session.
+    if (p.did_planned_session && hasRun() && !S.nextRest) {
+      p.log = p.log || { meals: [], symptoms: [] };
+      if (p.log.run_min == null && p.log.run_km == null) { p.log.run_min = plannedRunMin(S.step); p.log.run_km = planKm(S.step); p.log.estimated = true; }
+      if (!(p.log.symptoms || []).length && !p.red_flag) p.plan_action = 'up';
+      p.needs_question = false;
+    }
+    // Never ask the same question twice in a row.
+    const prevAi = [...S.logs].reverse().find((l) => l.date === dayKey() && !['meal', 'water'].includes(l.kind));
+    if (p.needs_question && prevAi?.parsed?.needs_question) {
+      p.reply = 'Sorry, I asked that already. Tap one of the buttons below, or tell me in a few words what you did today.';
+      p.quick = 'run';
+    }
+    if (p.needs_question && /\brun\b|ran|session|level/i.test(p.reply || '')) p.quick = 'run';
     const local = demoAI('checkin', text, {}).log;
     p.log = p.log || { meals: [], symptoms: [] };
     const planning = PLAN_RE.test(text); // don't log plans or questions as done
@@ -875,7 +901,10 @@
   });
   document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.go)));
   document.querySelectorAll('#tabbar button').forEach((b) => b.addEventListener('click', () => setTab(b.dataset.tab)));
-  $('thread').addEventListener('click', (e) => { const b = e.target.closest('[data-flow]'); if (b) answerFlow(b.dataset.flow); });
+  $('thread').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-flow]'); if (b) { answerFlow(b.dataset.flow); return; }
+    const q = e.target.closest('[data-say]'); if (q) { $('ciText').value = q.dataset.say; checkin(); }
+  });
   $('tellCoach').addEventListener('click', () => { setTab('coach'); setTimeout(() => $('ciText').focus(), 50); });
   $('stepGoalEdit').addEventListener('click', () => { const f = $('stepGoalForm'); f.hidden = !f.hidden; if (!f.hidden) { $('stepGoalIn').value = S.stepGoal || ''; $('stepGoalIn').focus(); } });
   $('stepGoalCancel').addEventListener('click', () => { $('stepGoalForm').hidden = true; });
