@@ -425,18 +425,14 @@
         : { label: 'Calories, meals logged', color: 'var(--c-cal)', frac: slotsLogged / 4, text: T.food ? `${r50(T.kLow)}–${r50(T.kHigh)}` : 'None yet' }] : []),
       { label: 'Sleep', color: 'var(--c-sleep)', frac: (T.sleep_h || 0) / sleepGoal, text: `${T.sleep_h ?? 0} / ${sleepGoal} h` },
     ];
-    // Water: 12 small glasses of 250 ml (10 in Ramadan, between iftar and sehri). Tap an empty glass to add one, the last full one to undo.
-    const glasses = Math.round(waterGoal / 0.25), drunk = Math.max(0, T.water_l / 0.25);
-    const glassSVG = (f, i) => `<svg viewBox="0 0 24 32" aria-hidden="true"><defs><clipPath id="gc${i}"><path d="M3 2h18l-2.2 27H5.2z"/></clipPath></defs><rect x="0" y="${32 - 30 * f}" width="24" height="32" clip-path="url(#gc${i})" class="gw"/><path d="M3 2h18l-2.2 27H5.2z" class="gl"/></svg>`;
-    $('glasses').innerHTML = Array.from({ length: glasses }, (_, i) => {
-      const f = Math.max(0, Math.min(1, drunk - i));
-      const label = f >= 1 ? `Glass ${i + 1}, done${i + 1 === Math.floor(drunk) ? '. Tap to undo' : ''}` : `Glass ${i + 1}, tap to add`;
-      return `<button class="g ${f >= 1 ? 'full' : f > 0 ? 'part' : ''}" data-i="${i}" aria-label="${label}">${glassSVG(f, i)}</button>`;
-    }).join('') + (drunk > glasses ? `<span class="g-extra">+${Math.round(drunk - glasses)}</span>` : '');
+    // Water glass: fills in 250 ml glasses towards 3 L (2.5 L between iftar and sehri in Ramadan)
+    const glasses = Math.round(waterGoal / 0.25);
+    $('glassFill').style.height = Math.min(100, (T.water_l / waterGoal) * 100) + '%';
+    $('glassMarks').innerHTML = Array.from({ length: glasses - 1 }, (_, i) => `<i style="bottom:${((i + 1) / glasses) * 100}%"></i>`).join('');
     $('waterAmt').textContent = `${+T.water_l.toFixed(2)} L`;
     $('waterGoal').textContent = `/ ${waterGoal} L`;
-    $('waterHint').textContent = S.ramadan ? `Ramadan: ${glasses} glasses between iftar and sehri. Tap a glass when you drink one.`
-      : T.water_l >= waterGoal ? 'All 12 done. Keep sipping if it is hot or you ran.' : `Tap a glass when you drink one (250 ml). ${Math.ceil(glasses - drunk)} to go.`;
+    $('waterHint').textContent = S.ramadan ? 'Ramadan: drink this between iftar and sehri. One tap adds a glass (250 ml).' : T.water_l >= waterGoal ? 'Goal reached. Keep sipping if it is hot or you ran.' : `One tap adds a glass (250 ml). ${Math.ceil((waterGoal - T.water_l) / 0.25)} glasses to go.`;
+    $('waterMinus').disabled = T.water_l <= 0;
     $('rings').innerHTML = ringsSVG(parts);
     $('legend').innerHTML = parts.map((p) => `<li><i style="background:${p.color}"></i><span>${p.label}</span><b>${p.text}</b></li>`).join('');
     const mini = (label, val, sub) => `<div class="mini"><b>${val}</b><span>${label}${sub ? `<br><small>${sub}</small>` : ''}</span></div>`;
@@ -705,12 +701,8 @@
   });
   $('addGoal').addEventListener('click', openSetup);
   $('mealAdd').addEventListener('click', addMeal);
-  $('glasses').addEventListener('click', (e) => {
-    const b = e.target.closest('.g'); if (!b) return;
-    const drunk = dayTotals(dayKey()).water_l / 0.25, i = +b.dataset.i;
-    if (i < Math.floor(drunk)) { if (i === Math.floor(drunk) - 1) addWater(-0.25); else toast('Tap the last full glass to undo.'); }
-    else addWater(0.25);
-  });
+  $('waterPlus').addEventListener('click', () => addWater(0.25));
+  $('waterMinus').addEventListener('click', () => addWater(-0.25));
   $('calGoalSave').addEventListener('click', saveCalGoal);
   $('calGoalClear').addEventListener('click', () => { delete S.calGoal; S.ideas = null; save(); $('calGoalMsg').textContent = 'Goal removed. Still keeping track.'; renderToday(); });
   $('ideasGo').addEventListener('click', suggestMeals);

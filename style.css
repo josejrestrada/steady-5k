@@ -267,23 +267,23 @@ h1 { font-size: 46px; font-weight: 800; font-style: italic; margin: 14px 0 12px;
 .rm { border: 0; background: transparent; color: var(--muted); font-size: 22px; line-height: 1; width: 32px; height: 32px; border-radius: 8px; flex: none; }
 .rm:hover { color: var(--flag); background: var(--flag-bg); }
 
-/* ---------- Water: 12 small glasses ---------- */
-.water-card { background: var(--surface); border-radius: var(--r-lg); padding: 16px 18px; margin: 10px 0 0; }
-.water-top { display: flex; justify-content: space-between; align-items: baseline; }
-.water-top .sec-title { color: var(--c-water); margin: 0; }
+/* ---------- Water glass ---------- */
+.water-card { display: grid; grid-template-columns: 96px 1fr; gap: 18px; align-items: center; background: var(--surface); border-radius: var(--r-lg); padding: 16px 18px; margin: 10px 0 0; }
+.glass { position: relative; width: 84px; height: 128px; margin: 0 auto; border: 3px solid rgba(255,255,255,.55); border-top: 0; border-radius: 0 0 18px 18px; clip-path: polygon(0 0, 100% 0, 88% 100%, 12% 100%); background: rgba(47,211,198,.06); overflow: hidden; }
+.glass-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: linear-gradient(180deg, #5FE3D8, var(--c-water)); transition: height .6s cubic-bezier(.2,.8,.2,1); }
+.glass-fill::before { content: ""; position: absolute; left: 0; right: 0; top: -3px; height: 6px; background: rgba(255,255,255,.35); border-radius: 50%; }
+.glass-marks i { position: absolute; left: 0; width: 22%; height: 1.5px; background: rgba(255,255,255,.45); }
+.glass-marks i:nth-child(4n) { width: 40%; background: rgba(255,255,255,.7); }
+.water-info .sec-title { color: var(--c-water); margin-bottom: 2px; }
 .water-amt { margin: 0; }
-.water-amt b { font-family: var(--display); font-size: 30px; font-weight: 800; }
-.water-amt span { font-family: var(--display); font-size: 18px; color: var(--muted); font-weight: 600; }
-.glasses { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px 6px; margin: 12px 0 6px; position: relative; }
-.g { border: 0; background: transparent; padding: 4px 0; display: grid; place-items: center; border-radius: 10px; }
-.g svg { width: 30px; height: 40px; overflow: visible; }
-.g .gl { fill: none; stroke: rgba(255,255,255,.35); stroke-width: 1.6; stroke-linejoin: round; }
-.g .gw { fill: var(--c-water); transition: y .4s cubic-bezier(.2,.8,.2,1); }
-.g.full .gl, .g.part .gl { stroke: var(--c-water); }
-.g:hover .gl { stroke: var(--ink-2); }
-.g-extra { position: absolute; right: 0; top: -22px; font-size: 13px; font-weight: 700; color: var(--c-water); }
-.water-card .small { margin: 4px 0 0; }
-@media (prefers-reduced-motion: reduce) { .g .gw { transition: none; } }
+.water-amt b { font-family: var(--display); font-size: 40px; font-weight: 800; }
+.water-amt span { font-family: var(--display); font-size: 22px; color: var(--muted); font-weight: 600; }
+.water-info .small { margin: 2px 0 10px; }
+.water-btns { display: flex; gap: 8px; }
+.wbtn { border: 1.5px solid var(--line); background: var(--surface-2); border-radius: 12px; height: 44px; min-width: 44px; padding: 0 14px; font-size: 18px; font-weight: 700; color: var(--ink-2); }
+.wbtn.plus { background: var(--c-water); border-color: var(--c-water); color: #04201E; font-size: 16px; flex: 1; }
+.wbtn:disabled { opacity: .4; }
+@media (prefers-reduced-motion: reduce) { .glass-fill { transition: none; } }
 
 /* ---------- Calorie goal and meal ideas ---------- */
 .goal-input { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
