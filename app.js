@@ -211,6 +211,7 @@
         ];
     const tips = [
       S.ramadan ? 'Ramadan: run 1–2 hours after iftar, once you have had water and a light meal. Never run while fasting.' : 'Drink a glass of water 30–60 minutes before, and take a bottle with you if it is hot.',
+      ...(S.ramadan ? ['Football or badminton while fasting counts as training: skip the run that day, keep matches short in the heat, and stop if you feel dizzy.'] : []),
       'Breathe through your nose and mouth together; relax your shoulders.',
       'Stop and walk if you feel chest pain, dizziness or sharp pain, and tell the coach.',
     ];
@@ -243,7 +244,7 @@
     $('flagBanner').hidden = !S.redFlag;
     // chips
     const T = dayTotals(dayKey());
-    const waterGoal = S.ramadan ? 'iftar→sehri' : 'aim ~3 L';
+    const waterGoal = S.ramadan ? 'aim ~2.5 L, iftar→sehri' : 'aim ~3 L';
     const chip = (label, val, sub, on) => `<div class="chip ${on ? '' : 'empty'}"><b>${val}</b><span>${label}</span>${sub ? `<span>${sub}</span>` : ''}</div>`;
     $('chips').innerHTML = [
       chip('Run', T.run ? `${+T.run_km.toFixed(1)} km` : '—', '', T.run),
